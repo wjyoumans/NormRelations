@@ -1,0 +1,13 @@
+name = "NormRelations"
+uuid = "097621a9-80ea-4d2b-b5e7-049610ffafc3"
+authors = ["wjyoumans <wyoumans@usf.edu> and contributors"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
