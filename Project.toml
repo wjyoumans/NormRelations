@@ -3,6 +3,10 @@ uuid = "097621a9-80ea-4d2b-b5e7-049610ffafc3"
 authors = ["wjyoumans <wyoumans@usf.edu> and contributors"]
 version = "1.0.0-DEV"
 
+[deps]
+Hecke = "3e1990a7-5d81-5526-99ce-9ba3ff248f21"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+
 [compat]
 julia = "1"
 

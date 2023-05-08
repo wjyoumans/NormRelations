@@ -1,0 +1,74 @@
+echo "test(polcyclo(216),out)" | gp -D path=.:abelianbnf -D parisize=100000000 -q abelianbnf.gp
+
+
+This is abelianbnf, version 1.0 of September 2020.
+
+abelianbnf is a gp script computing class groups of abelian fields using the
+methods described in the paper "Norm relations and computational problems in
+number fields" by Jean-François Biasse, Claus Fieker, Tommy Hofmann and
+Aurel Page, available at https://hal.inria.fr/hal-02497890
+Author: Aurel Page, Copyright (C) Inria 2020 
+
+abelianbnf is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+abelianbnf is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+===============================================================================
+
+To get started, you should first get a copy of Pari/gp at
+
+  http://pari.math.u-bordeaux.fr/download.html
+  http://pari.math.u-bordeaux.fr/anongit.html
+
+The Pari/gp version should be the development version or stable >= 2.13.
+
+Then, simply include the file abelianbnf.gp with
+
+  \r abelianbnf.gp
+
+The main functions are:
+
+  abelianbnfinit:
+    Input: a polynomial defining a number field
+    Output: some technical data
+
+  getcyc:
+    Input: the technical data output by abelianbnfinit
+    Output: the structure of the class group of the number field
+
+  abelianbnfcertify:
+    Input: the technical data output by abelianbnfinit
+    Output: 1 if the function successfully unconditionally certified the
+      correctness of the computed class group
+
+  vprintab:
+    This is a global variable, set to 0 by default. Set it to 1 to get verbose
+    output.
+
+Run test.gp to check that the script runs correctly.
+
+See examples.gp and unconditional-cyclotomics.gp for some examples of use.
+
+===============================================================================
+
+You can write to me at
+
+  aurel.page@normalesup.org
+
+Please report any bug you find and send me feedback!
+
+You can find the latest version at
+
+  http://www.normalesup.org/~page/software.html
+
+Thanks for you support, and have fun !
+
