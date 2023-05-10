@@ -1,6 +1,9 @@
 # NormRelations
 
+<!---
+Requires workflow scope for access token
 [![Build Status](https://github.com/wjyoumans/NormRelations.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/wjyoumans/NormRelations.jl/actions/workflows/CI.yml?query=branch%3Amain)
+--->
 
 A Julia package for working with norm relations in abelian fields. This package contains the tools to reproduce many of the computations from [[1]](#1) and [[3]](#3).
 
