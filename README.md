@@ -4,7 +4,7 @@ A Julia package for working with norm relations in abelian fields. This package 
 
 Special thanks to Aurel Page for providing *abelianbnf* [[4]](#4), a [GP](https://pari.math.u-bordeaux.fr/) script licensed under [GPL V3+](https://www.gnu.org/licenses/gpl-3.0.html) 
 that computes the class group of certain Galois number fields by exploiting the existence of norm relations, using the algorithm described in [[2]](#2). 
-This is also being used to produce a database of invariants of cyclotomic fields, [CycloDB](cyclodb.org).
+This is also being used to produce a database of invariants of cyclotomic fields, [CycloDB](https://www.cyclodb.org/).
 
 ## Usage
 
