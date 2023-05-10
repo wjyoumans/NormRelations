@@ -1,10 +1,5 @@
 # NormRelations
 
-<!---
-Requires workflow scope for access token
-[![Build Status](https://github.com/wjyoumans/NormRelations.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/wjyoumans/NormRelations.jl/actions/workflows/CI.yml?query=branch%3Amain)
---->
-
 A Julia package for working with norm relations in abelian fields. This package contains the tools to reproduce many of the computations from [[1]](#1) and [[3]](#3).
 
 Special thanks to Aurel Page for providing *abelianbnf* [[4]](#4), a [GP](https://pari.math.u-bordeaux.fr/) script licensed under [GPL V3+](https://www.gnu.org/licenses/gpl-3.0.html) 
