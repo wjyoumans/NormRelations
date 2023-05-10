@@ -11,8 +11,8 @@ This is also being used to produce a database of invariants of cyclotomic fields
 1. Install [Julia](https://julialang.org/) if it is not already installed. 
 2. Download/clone this repository and navigate to the top-level directory.
 3. Run `julia --project=.`
-4. Inside the Julia REPL, run `import Pkg; Pkg.instantiate()`. This configured dependencies and is only needed on the first run.
-5. Run `using NormRelations` to load the package.
+4. Inside the Julia REPL, run `import Pkg; Pkg.instantiate()`. This configures dependencies and is only needed on the first run.
+5. Inside the REPL, run `using NormRelations` to load the package.
 
 Now the NormRelations package is available. [Hecke](https://github.com/thofma/Hecke.jl) is also reexported by NormRelations so all Hecke functions will be available as well.
 Instructions on running specific examples soon to come.
