@@ -3,7 +3,7 @@ module NormRelations
 using Reexport
 @reexport using Hecke
 
-import Hecke: sunit_group_fac_elem
+import Hecke: MapSUnitGrpFacElem, sunit_group_fac_elem
 
 # TODO: Make pari optional?
 
@@ -22,12 +22,10 @@ STABLE = 10
 ABELIANBNFPATH = string(@__DIR__, "/Pari/abelianbnf/abelianbnf.gp")
 
 include("Util.jl")
+include("NormRelation.jl")
 include("IdealDecomp.jl")
 include("IdealSVP.jl")
-include("LogEmbedding.jl")
 include("MinusPart.jl")
-include("NormRelation.jl")
-include("Pari.jl")
 include("PIP.jl")
 include("Root.jl")
 include("Saturate.jl")

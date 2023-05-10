@@ -1,8 +1,5 @@
 
-import Hecke: MapSUnitGrpFacElem, abelian_group
-
-add_verbose_scope(:SUnits)
-add_assert_scope(:SUnits)
+import Hecke: abelian_group
 
 include("SUnits/Recursive.jl")
 include("SUnits/Util.jl")

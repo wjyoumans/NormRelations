@@ -361,7 +361,7 @@ function __sunit_group_fac_elem_quo_via_brauer(N::NormRelation, S::Vector{NfOrdI
     throw(NotImplemented())
   end
 
-  r = Hecke.MapSUnitGrpFacElem()
+  r = MapSUnitGrpFacElem()
   r.valuations = Vector{SRow{fmpz}}(undef, ngens(res_group))
   for i = 1:length(units)
     r.valuations[i] = sparse_row(FlintZZ)
@@ -395,7 +395,7 @@ function __sunit_group_fac_elem_quo_via_brauer(N::NormRelation, S::Vector{NfOrdI
 
   cache.SU = res_group
   cache.mSU = r
-  return (res_group, r)::Tuple{GrpAbFinGen, Hecke.MapSUnitGrpFacElem}
+  return (res_group, r)::Tuple{GrpAbFinGen, MapSUnitGrpFacElem}
 end
 
 function sunit_group_fac_elem(S::Vector{NfOrdIdl}, N::NormRelation, invariant::Bool = false, compact::Int = 0; saturate_units::Bool = false, cache::NormRelCache = NormRelCache(S, N))

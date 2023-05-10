@@ -2,7 +2,7 @@
 import Hecke.NormRel: NormRelation
 
 import Hecke: order, group, subfield, subfields, coefficients, subgroup, subgroups, 
-	      norm, istrivial, lift!, MapSUnitGrpFacElem
+	      norm, istrivial, lift!
 
 # Combine some functions from Hecke and Hecke.NormRel
 
@@ -26,12 +26,10 @@ function subfields(N::NormRelation)
   return Hecke.NormRel.subfield(N)
 end
 
-add_verbose_scope(:NormRelCache)
-add_assert_scope(:NormRelCache)
-
 include("NormRelation/AbNormRelation.jl")
 include("NormRelation/NormRelCache.jl")
 
 export abelian_norm_relation, norm_relation_cache, has_norm_relation,
-       decomposition_lifts, sunit_group, subfields, idealset, decomposition_lift
+       decomposition_lifts, sunit_group, subfields, idealset, decomposition_lift,
+       NormRelCache
 
