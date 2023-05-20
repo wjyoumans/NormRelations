@@ -349,7 +349,7 @@ function _abelian_norm_relation(K::AnticNumberField; max_den::Int=0, full::Bool=
 
   iscyclo, n = Hecke.iscyclotomic_type(K)
   if iscyclo
-    t = basiszahl_cyclo(K)
+    t = basiszahl(K)
   end
 
   if full
@@ -449,4 +449,25 @@ function get_hecke_norm_relation(N::AbNormRelation{AnticNumberField})
   end
 
   return z
+end
+
+function get_ab_norm_relation(z::Hecke.NormRel.NormRelation{Int})
+  K = z.K
+  N = AbNormRelation(K)
+  if degree(K) == 1
+    return N
+  end
+
+  n = length(z.subfields)
+  N.subs = z.subfields
+  N.den = z.denominator
+  N.coeffs = [z.coefficients_gen[i][1][1] for i=1:n]
+  #N.brauer_coeffs = [[divexact(N.coeffs[i]*order(N.subs[i][1]), N.den) for i in 1:length(N)]]
+  
+  N.nonred = [1 for i=1:n]
+  for i in z.nonredundant
+    N.nonred[i] = 0
+  end
+
+  return N
 end

@@ -91,7 +91,7 @@ end
 
 function lift_nonsymmetric(a::nmod_mat)
     z = fmpz_mat(nrows(a), ncols(a))
-    z.base_ring = FlintZZ
+    #z.base_ring = FlintZZ
     ccall((:fmpz_mat_set_nmod_mat_unsigned, Hecke.libflint), Nothing,
             (Ref{fmpz_mat}, Ref{nmod_mat}), z, a)
     return z
@@ -99,7 +99,7 @@ end
 
 function lift_nonsymmetric(a::gfp_mat)
     z = fmpz_mat(nrows(a), ncols(a))
-    z.base_ring = FlintZZ
+    #z.base_ring = FlintZZ
     ccall((:fmpz_mat_set_nmod_mat_unsigned, Hecke.libflint), Nothing,
             (Ref{fmpz_mat}, Ref{gfp_mat}), z, a)
     return z
@@ -242,7 +242,7 @@ function saturate_exp(R, d::Int; stable = 10, strategy = :classic, must_be_uniqu
     end
   else
     @assert strategy == :aurel
-    stable = unit_rank(K) + 40
+    stable = Hecke.unit_group_rank(K) + 40
 
     for q in S
 
@@ -371,7 +371,7 @@ function saturate_exp_generic(R::Vector{FacElem{nf_elem, AnticNumberField}}, d::
 
     end
   elseif strategy == :aurel
-    stable = unit_rank(K) + 40
+    stable = Hecke.unit_group_rank(K) + 40
 
     for q in S
       if isdefining_polynomial_nice(K) && isindex_divisor(OK, q)

@@ -2,6 +2,8 @@
 # Algorithms for working with the Stickelberger lattice, used
 # to solve the close principal multiple problem. See [??].
 
+# TODO: switch to rows instead of cols
+
 function fractional_part(x)
   return x - floor(x)
 end

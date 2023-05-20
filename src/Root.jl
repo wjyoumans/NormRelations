@@ -308,7 +308,7 @@ function ispower_mod_units(N::NormRelation,
     #    end
     
     # changed to 2:ngens to avoid torsion units of subfields (avoid repetition?)
-    @vtime :NormRelation 1 append!(units, (embedding(N, i)(mU(U[j])) for j in 2:ngens(U)))
+    @vtime :NormRelation 1 append!(units, (Hecke.NormRel.embedding(N, i)(mU(U[j])) for j in 2:ngens(U)))
     # @show units
   end
   ##units = utx.units

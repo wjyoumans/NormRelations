@@ -7,4 +7,4 @@ add_assert_scope(:PIP)
 include("PIP/DecisionalPIP.jl")
 include("PIP/SearchPIP.jl")
 
-export decisional_pip, search_pip
+export decisional_pip, search_pip, isprincipal_sunits
