@@ -8,7 +8,7 @@ include("Abelian.jl")
 #  ### Abelian ###
 # 
 #  @info "Abelian.jl"
-#  K, a = CyclotomicField(12, "a", cached=false)
+#  K, a = cyclotomic_field(12, "a", cached=false)
 #  A, mA = automorphism_group(K)
 #  G, AtoG, GtoA = Hecke.find_isomorphism_with_abelian_group(collect(A), *)
 #  H, mH = sub(G, [G[1]])

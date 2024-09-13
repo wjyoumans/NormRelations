@@ -53,7 +53,7 @@ end
 
 # variant using class group preimage/discrete log
 # It takes an ideal I, and gives the exponents of I with respect to S
-function decompose_preimage(I::NfOrdIdl, S::Vector{NfOrdIdl})
+function decompose_preimage(I::AbsSimpleNumFieldOrderIdeal, S::Vector{AbsSimpleNumFieldOrderIdeal})
   O = order(S[1])
   C, mC = class_group(O)
   Sinc = [mC\p for p in S]
@@ -66,7 +66,7 @@ end
 
 # basic ideal decomposition
 # TODO: use decomposition field to reduce dimension when possible
-function _decompose(A::NfOrdIdl, S::Vector{NfOrdIdl})
+function _decompose(A::AbsSimpleNumFieldOrderIdeal, S::Vector{AbsSimpleNumFieldOrderIdeal})
   OK = order(A)
   n = length(S)
     
@@ -154,7 +154,7 @@ function _decompose(A::NfOrdIdl, S::Vector{NfOrdIdl})
 end
 
 function decompose(
-    A::NfOrdIdl,
+    A::AbsSimpleNumFieldOrderIdeal,
     cache::NormRelCache;
     stable=STABLE, 
     parisizemax=PARISIZEMAX,
@@ -169,8 +169,8 @@ end
 # denominator is used) then A != a*B but A is equivalent to B. This is because
 # we skip the root computation that would give a.
 function decompose(
-    A::NfOrdIdl,
-    S::Vector{NfOrdIdl},
+    A::AbsSimpleNumFieldOrderIdeal,
+    S::Vector{AbsSimpleNumFieldOrderIdeal},
     cache::NormRelCache = NormRelCache(S);
     stable=STABLE, 
     parisizemax=PARISIZEMAX,
@@ -294,9 +294,9 @@ end
 # Given field extension L/K, S1 prime ideals of L and S2 prime ideals of K that 
 # factor over S1, return a map sending decompositions over S2 to decompositions 
 # over S1.
-function decomposition_lift(S1::Vector{NfOrdIdl}, S2::Vector{NfOrdIdl}, mL::NfToNfMor)
+function decomposition_lift(S1::Vector{AbsSimpleNumFieldOrderIdeal}, S2::Vector{AbsSimpleNumFieldOrderIdeal}, mL::NumFieldHom)
   #=
-  SL = Set{NfOrdIdl}()
+  SL = Set{AbsSimpleNumFieldOrderIdeal}()
   for P in S
     p = minimum(mL, P)
 

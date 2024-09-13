@@ -25,12 +25,12 @@
 #TODO FacElem ideals, Fractional ideals
 
 # TODO: choose method. Only uses method 1 for now.
-function search_pip(A::NfOrdIdl; cache::NormRelCache=NormRelCache())
+function search_pip(A::AbsSimpleNumFieldOrderIdeal; cache::NormRelCache=NormRelCache())
   return search_pip_with_sunits(A, cache=cache)
 end
 
 # Return true and a generator if A is principal, false otherwise.
-function search_pip_with_sunits(A::NfOrdIdl; cache::NormRelCache=NormRelCache())
+function search_pip_with_sunits(A::AbsSimpleNumFieldOrderIdeal; cache::NormRelCache=NormRelCache())
   local P, den
 
   if !isempty(cache)
@@ -58,7 +58,7 @@ function search_pip_with_sunits(A::NfOrdIdl; cache::NormRelCache=NormRelCache())
   for i = 1:len
     a = B[i]
     n = ZZ(divexact(norm(a), norm_A))
-    if isprime(n)
+    if is_prime(n)
       P, den = integral_split(ideal(OK, a)//A)
       #if length(prime_decomposition(OK, minimum(P))) == degree(K)
 	found = true
@@ -89,7 +89,7 @@ function search_pip_with_sunits(A::NfOrdIdl; cache::NormRelCache=NormRelCache())
     n = ZZ(divexact(norm(a), norm_A))
     if n == 1
       return true, FacElem(K(a))*inv(d)
-    elseif isprime(n)
+    elseif is_prime(n)
       P, den = integral_split(ideal(OK, a)//A)
       #if length(prime_decomposition(OK, minimum(P))) == degree(K)
 	found = true
@@ -100,7 +100,7 @@ function search_pip_with_sunits(A::NfOrdIdl; cache::NormRelCache=NormRelCache())
 
   p = minimum(P)
   @assert norm(den) == 1
-  @assert isprime(p)
+  @assert is_prime(p)
 
   S = prime_ideals_over(OK, p)
   if issubset(S, idealset(cache))
@@ -134,8 +134,12 @@ function search_pip_with_sunits(A::NfOrdIdl; cache::NormRelCache=NormRelCache())
   return true, a*inv(d)
 end
 
+function Hecke.basis_matrix(::Type{Hecke.FakeFmpqMat}, A::AbsNumFieldOrderIdeal; copy::Bool = true)
+  return Hecke.FakeFmpqMat(basis_matrix(A; copy = copy))
+end
+
 # Return true and a generator if A is principal, false otherwise.
-function isprincipal_sunits(A::NfOrdIdl, N::NormRelation)
+function isprincipal_sunits(A::AbsSimpleNumFieldOrderIdeal, N::NormRelation)
   local P, den
 
   A, d = Hecke.reduce_ideal(A)
@@ -159,7 +163,7 @@ function isprincipal_sunits(A::NfOrdIdl, N::NormRelation)
   for i = 1:len
     a = B[i]
     n = ZZ(divexact(norm(a), norm_A))
-    if isprime(n)
+    if is_prime(n)
       P, den = integral_split(ideal(OK, a)//A)
       #if length(prime_decomposition(OK, minimum(P))) == degree(K)
 	found = true
@@ -190,7 +194,7 @@ function isprincipal_sunits(A::NfOrdIdl, N::NormRelation)
     n = ZZ(divexact(norm(a), norm_A))
     if n == 1
       return true, FacElem(K(a))*inv(d)
-    elseif isprime(n)
+    elseif is_prime(n)
       P, den = integral_split(ideal(OK, a)//A)
       #if length(prime_decomposition(OK, minimum(P))) == degree(K)
 	found = true
@@ -201,7 +205,7 @@ function isprincipal_sunits(A::NfOrdIdl, N::NormRelation)
 
   p = minimum(P)
   @assert norm(den) == 1
-  @assert isprime(p)
+  @assert is_prime(p)
 
   S = prime_ideals_over(OK, p)
   @vprint :PIP 1 "Computing new S-unit group for primes above p = $p.\n"
@@ -234,7 +238,7 @@ end
 # TODO: some fields in the bottom layer are isomorphic/conjugate. We can
 #   reduce the amount of class group computations by leveraging the isomorphism.
 function Hecke.isprincipal(
-      I::NfOrdIdl, 
+      I::AbsSimpleNumFieldOrderIdeal, 
       NN::NormRelation; 
       max_den::Int = 0,
       redo::Bool = false, 
@@ -254,15 +258,15 @@ function Hecke.isprincipal(
   @vprint :NormRelation 2 "Solving PIP over $(nf(order(I))) "
   @vprint :NormRelation 2 "using norm relation with denominator $(d).\n"
 
-  local a::FacElem{nf_elem, AnticNumberField}
-  local c::FacElem{nf_elem, AnticNumberField}
+  local a::FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}
+  local c::FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}
   local b::Bool
 
   a = FacElem(K(1))
   b = true
   for i in 1:length(N)
     @vprint :NormRelation 2 "---------------------------------------------------------\n"
-    L, mL = N[i]::Tuple{AnticNumberField, NfToNfMor}
+    L, mL = N[i]::Tuple{AbsSimpleNumField, NumFieldHom}
     OL = lll(maximal_order(L))
 
     @vprint :NormRelation 2 "Solving PIP in subfield $(i)/$(length(N)) of degree $(degree(L)).\n"
@@ -271,7 +275,7 @@ function Hecke.isprincipal(
       b = true
       c = FacElem(L(norm(I)))
 
-    elseif isprime(degree(L))
+    elseif is_prime(degree(L))
       @vprint :NormRelation 2 "Solving PIP classically.\n"
       b, c = Hecke.isprincipal_fac_elem(norm(mL, I, order=OL))
       #b, c = Hecke.isprincipal_fac_elem(intersect(I, OL, mL))
@@ -299,7 +303,7 @@ function Hecke.isprincipal(
     #b, a = ispower_mod_units(N, a, d, redo=redo, stable=stable, trager=trager, strategy=strategy)
     #if !b return (false, FacElem(K(0))) end
     if obvious_decomposition
-      b, a = ispower_mod_units(NN, a, d, redo=redo, stable=stable, trager=trager, strategy=strategy, decom=FacElem(Dict(I => fmpz(d))))
+      b, a = ispower_mod_units(NN, a, d, redo=redo, stable=stable, trager=trager, strategy=strategy, decom=FacElem(Dict(I => ZZRingElem(d))))
     else
       b, a = ispower_mod_units(NN, a, d, redo=redo, stable=stable, trager=trager, strategy=strategy)
     end
@@ -315,8 +319,8 @@ end
 # TODO: some fields in the bottom layer are isomorphic/conjugate. We can
 #   reduce the amount of class group computations by leveraging the isomorphism
 function search_pip_without_sunits(
-      I::NfOrdIdl, 
-      N::AbNormRelation{AnticNumberField}; 
+      I::AbsSimpleNumFieldOrderIdeal, 
+      N::AbNormRelation{AbsSimpleNumField}; 
       max_den::Int = 0,
       redo::Bool = false, 
       stable::Int = 10,
@@ -333,15 +337,15 @@ function search_pip_without_sunits(
     @vprint :NormRelation 2 "Solving PIP over $(nf(order(I))) "
     @vprint :NormRelation 2 "using norm relation with denominator $(d).\n"
 
-    local a::FacElem{nf_elem, AnticNumberField}
-    local c::FacElem{nf_elem, AnticNumberField}
+    local a::FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}
+    local c::FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}
     local b::Bool
 
     a = FacElem(K(1))
     b = true
     for i in 1:length(N)
       @vprint :NormRelation 2 "---------------------------------------------------------\n"
-      L, mL = N[i]::Tuple{AnticNumberField, NfToNfMor}
+      L, mL = N[i]::Tuple{AbsSimpleNumField, NumFieldHom}
       OL = lll(maximal_order(L))
 
       @vprint :NormRelation 2 "Solving PIP in subfield $(i)/$(length(N)) of degree $(degree(L)).\n"
@@ -350,7 +354,7 @@ function search_pip_without_sunits(
         b = true
         c = FacElem(L(norm(I)))
 
-      elseif isprime(degree(L))
+      elseif is_prime(degree(L))
         @vprint :NormRelation 2 "Solving PIP classically.\n"
         b, c = Hecke.isprincipal_fac_elem(norm(mL, I, order=OL))
         #b, c = Hecke.isprincipal_fac_elem(intersect(I, OL, mL))
@@ -378,7 +382,7 @@ function search_pip_without_sunits(
       #b, a = ispower_mod_units(N, a, d, redo=redo, stable=stable, trager=trager, strategy=strategy)
       #if !b return (false, FacElem(K(0))) end
       if obvious_decomposition
-        b, a = ispower_mod_units(N, a, d, redo=redo, stable=stable, trager=trager, strategy=strategy, decom=FacElem(Dict(I => fmpz(d))))
+        b, a = ispower_mod_units(N, a, d, redo=redo, stable=stable, trager=trager, strategy=strategy, decom=FacElem(Dict(I => ZZRingElem(d))))
       else
         b, a = ispower_mod_units(N, a, d, redo=redo, stable=stable, trager=trager, strategy=strategy)
       end

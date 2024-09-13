@@ -14,8 +14,8 @@ mutable struct AbNormRelation{T}
   nonred::Vector{Int}                 # nonredundant subgroups/subfields (not a subfield of
                                       # another field in the relation etc.)
 
-  prime_decompositions::Dict{fmpz, Vector{Tuple{NfOrdIdl, Int}}}
-  function AbNormRelation(A::T) where T <: Union{AnticNumberField, GrpAbFinGen}
+  prime_decompositions::Dict{ZZRingElem, Vector{Tuple{AbsSimpleNumFieldOrderIdeal, Int}}}
+  function AbNormRelation(A::T) where T <: Union{AbsSimpleNumField, FinGenAbGroup}
     N = new{T}()
     N.base = A
     N.den = 1
@@ -23,38 +23,38 @@ mutable struct AbNormRelation{T}
     N.coeffs = [1]
     N.brauer_coeffs = [[1]]
     N.nonred = [1]
-    N.prime_decompositions = Dict{fmpz, Vector{Tuple{NfOrdIdl, Int}}}()
+    N.prime_decompositions = Dict{ZZRingElem, Vector{Tuple{AbsSimpleNumFieldOrderIdeal, Int}}}()
     return N
   end
 end
 
 
-field(N::AbNormRelation{AnticNumberField}) = N.base
-group(N::AbNormRelation{GrpAbFinGen}) = N.base
+field(N::AbNormRelation{AbsSimpleNumField}) = N.base
+group(N::AbNormRelation{FinGenAbGroup}) = N.base
 index(N::AbNormRelation) = N.den
 Base.denominator(N::AbNormRelation) = N.den
 Base.size(N::AbNormRelation) = size(N.subs)
 Base.length(N::AbNormRelation) = length(N.subs)
 Base.IndexStyle(::Type{<:AbNormRelation}) = IndexLinear()
 Base.getindex(N::AbNormRelation, i::Int) = N.subs[i]
-Base.setindex!(N::AbNormRelation{GrpAbFinGen}, S::Tuple{GrpAbFinGen,GrpAbFinGenMap}, i::Int) = 
+Base.setindex!(N::AbNormRelation{FinGenAbGroup}, S::Tuple{FinGenAbGroup,FinGenAbGroupHom}, i::Int) = 
   (N.subs[i] = S)
-Base.setindex!(N::AbNormRelation{AnticNumberField}, S::Tuple{AnticNumberField,NfToNfMor}, i::Int) = 
+Base.setindex!(N::AbNormRelation{AbsSimpleNumField}, S::Tuple{AbsSimpleNumField,NumFieldHom}, i::Int) = 
   (N.subs[i] = S)
 coefficient(N::AbNormRelation, i::Int) = N.coeffs[i]
 coefficients(N::AbNormRelation) = N.coeffs
 embedding(N::AbNormRelation, i::Int) = N.subs[i][2]
 embeddings(N::AbNormRelation) = [N.subs[i][2] for i in 1:length(N)]
-subfield(N::AbNormRelation{AnticNumberField}, i::Int) = N.subs[i]
-subfields(N::AbNormRelation{AnticNumberField}) = N.subs
-subgroup(N::AbNormRelation{GrpAbFinGen}, i::Int) = N.subs[i]
-subgroups(N::AbNormRelation{GrpAbFinGen}) = N.subs
-norm(N::AbNormRelation{AnticNumberField}, i::Int, a) = norm(N.subs[i][2], a)
+subfield(N::AbNormRelation{AbsSimpleNumField}, i::Int) = N.subs[i]
+subfields(N::AbNormRelation{AbsSimpleNumField}) = N.subs
+subgroup(N::AbNormRelation{FinGenAbGroup}, i::Int) = N.subs[i]
+subgroups(N::AbNormRelation{FinGenAbGroup}) = N.subs
+norm(N::AbNormRelation{AbsSimpleNumField}, i::Int, a) = norm(N.subs[i][2], a)
 isredundant(N::AbNormRelation, i::Int) = !Bool(N.nonred[i])
 istrivial(N::AbNormRelation) = (length(N) <= 1)
 
 
-function Base.show(io::IO, N::AbNormRelation{AnticNumberField})
+function Base.show(io::IO, N::AbNormRelation{AbsSimpleNumField})
   print(io, "Norm relation on $(N.base) with denominator $(N.den)")
   if index(N) > 0
     print(io, " and subfields")
@@ -64,7 +64,7 @@ function Base.show(io::IO, N::AbNormRelation{AnticNumberField})
   end
 end
 
-function Base.show(io::IO, N::AbNormRelation{GrpAbFinGen})
+function Base.show(io::IO, N::AbNormRelation{FinGenAbGroup})
   print(io, "Norm relation on $(N.base) with denominator $(N.den)")
   if index(N) > 0
     print(io, " and subgroups")
@@ -76,7 +76,7 @@ end
 
 # given a norm relation N on subgroups of H for H < G, lift
 # N to a relation on subgroups of G. f is the injection H -> G.
-function lift!(N::AbNormRelation{GrpAbFinGen}, f::GrpAbFinGenMap)
+function lift!(N::AbNormRelation{FinGenAbGroup}, f::FinGenAbGroupHom)
   subs = []
   for i in 1:length(N)
     H, mH = subgroup(N, i)
@@ -89,7 +89,7 @@ end
 
 # combine array of norm relations using bezout identity. doesn't require
 # coprime denominators, but probably should.
-function bezout(A::Array{AbNormRelation{T},1}) where T <: Union{AnticNumberField,GrpAbFinGen}
+function bezout(A::Array{AbNormRelation{T},1}) where T <: Union{AbsSimpleNumField,FinGenAbGroup}
   # @assert all have den > 0
   # @assert all have same top field/group, A.A
   D = [index(N) for N in A]
@@ -150,7 +150,7 @@ function bezout(A::Array{Int, 1})
 end
 
 # returns the p-part of G as well as the coprime-to-p-part 
-function p_part(G::GrpAbFinGen, p::Union{fmpz, Int})
+function p_part(G::FinGenAbGroup, p::Union{ZZRingElem, Int})
   ord = order(G)
   k = valuation(ord, p)
   #return quo(G, p^k), quo(G, Int64(round(ord//(p^k))))
@@ -158,7 +158,7 @@ function p_part(G::GrpAbFinGen, p::Union{fmpz, Int})
 end
 
 # returns the p-rank of a group
-function p_rank(G::GrpAbFinGen, p::Union{fmpz, Int})
+function p_rank(G::FinGenAbGroup, p::Union{ZZRingElem, Int})
   Q, mQ = quo(G, p)
   # should be an easier way to get the cyclic factors?
   return length(elementary_divisors(Q))
@@ -166,16 +166,16 @@ end
 
 # Decompose G as C x Q where C is the largest cyclic factor.
 # TODO: return subgroups of G with maps into G (quo is not a subgp)
-function cyclic_factor(G::GrpAbFinGen)
+function cyclic_factor(G::FinGenAbGroup)
   m = maximum(elementary_divisors(G))
   # the subgroups iterator is apparently not type stable
-  C = first(subgroups(G, order=m))::Tuple{GrpAbFinGen, GrpAbFinGenMap}
+  C = first(subgroups(G, order=m))::Tuple{FinGenAbGroup, FinGenAbGroupHom}
   return C, quo(G, C[1])
 end
 
 # TODO: Really bad implementation, not really an issue though
-function character_kernel(X::GrpAbFinGenElem, mX::Map, G::GrpAbFinGen)
-  ker = GrpAbFinGenElem[]
+function character_kernel(X::FinGenAbGroupElem, mX::Map, G::FinGenAbGroup)
+  ker = FinGenAbGroupElem[]
   for g in collect(G)
     if mX(X)(g).elt == 0
       push!(ker, g)
@@ -186,7 +186,7 @@ end
 
 
 # proposition 2.26 of BFHP
-function naive_norm_relation(G::GrpAbFinGen)
+function naive_norm_relation(G::FinGenAbGroup)
   # dual group (group of chars)
   D, mD = dual(G)
   ord = order(G)
@@ -244,13 +244,13 @@ function naive_norm_relation(G::GrpAbFinGen)
   return N
 end
 
-function naive_norm_relation(G::GrpGen)
+function naive_norm_relation(G::MultTableGroup)
   G, AtoG, GtoA = Hecke.find_isomorphism_with_abelian_group(collect(G), *)
   return naive_norm_relation(G)
 end
 
 # optimal norm relation per theorem 2.27 of BFHP.
-function _abelian_norm_relation(G::GrpAbFinGen; max_den::Int=0)
+function _abelian_norm_relation(G::FinGenAbGroup; max_den::Int=0)
   C, Q = cyclic_factor(G)
   c = order(C[1])
   q = order(Q[1])
@@ -266,7 +266,7 @@ function _abelian_norm_relation(G::GrpAbFinGen; max_den::Int=0)
     # subgroups in relation have index at most n0
     #n0 *= maximum([order(ppart(Q[1], p)[1][1]) for p in primes])
     
-    normrels = Array{AbNormRelation{GrpAbFinGen}, 1}()
+    normrels = Array{AbNormRelation{FinGenAbGroup}, 1}()
     for p in keys(factor(order(G)).fac)
       Gp, Gcp = p_part(G, p)
       @vtime :NormRelation 3 N = naive_norm_relation(Gcp[1])
@@ -302,10 +302,10 @@ function _abelian_norm_relation(G::GrpAbFinGen; max_den::Int=0)
       # noncyclic subgroup so the norm relation is optimal? (few subgroups of low order)
       # we should be able to describe it exactly instead of checking all subgroups
       H, mH = Gp
-      divs1 = fmpz[]
+      divs1 = ZZRingElem[]
       avg1 = 0
       subs = subgroups(H, index=ind)
-      for s::Tuple{GrpAbFinGen, GrpAbFinGenMap} in subs
+      for s::Tuple{FinGenAbGroup, FinGenAbGroupHom} in subs
         if !iscyclic(s[1]) 
           divs2 = elementary_divisors(s[1])
           avg2 = Int(sum(divs2))/length(divs2)
@@ -330,7 +330,7 @@ function _abelian_norm_relation(G::GrpAbFinGen; max_den::Int=0)
   return N
 end
 
-function _abelian_norm_relation(G::GrpGen; max_den::Int=0)
+function _abelian_norm_relation(G::MultTableGroup; max_den::Int=0)
   G, AtoG, GtoA = Hecke.find_isomorphism_with_abelian_group(collect(G), *)
   return _abelian_norm_relation(G, max_den=max_den)
 end
@@ -338,7 +338,7 @@ end
 # norm relation of a field K
 # if full we skip finding denominator 1 norm relation and instead find the
 # norm relation with smallest subfields (not compatible with max_den)
-function _abelian_norm_relation(K::AnticNumberField; max_den::Int=0, full::Bool=false)
+function _abelian_norm_relation(K::AbsSimpleNumField; max_den::Int=0, full::Bool=false)
   N = AbNormRelation(K)
   if degree(K) == 1
     return N
@@ -368,7 +368,7 @@ function _abelian_norm_relation(K::AnticNumberField; max_den::Int=0, full::Bool=
     return N
   end
 
-  N.subs = Tuple{AnticNumberField, NfToNfMor}[]
+  N.subs = Tuple{AbsSimpleNumField, NumFieldHom}[]
   for i in 1:length(NG)
     H, mH = subgroup(NG, i)
 
@@ -379,7 +379,7 @@ function _abelian_norm_relation(K::AnticNumberField; max_den::Int=0, full::Bool=
     #  @assert length(Hecke.get_automorphisms(L)) != 0
     #  flush(stdout)
     #else
-      @vtime :NormRelation 3 autos = NfToNfMor[mA(GtoA[mH(h)]) for h in gens(H)]
+      @vtime :NormRelation 3 autos = [mA(GtoA[mH(h)]) for h in gens(H)]
       @vtime :NormRelation 3 L, mL = fixed_field(K, autos)
       flush(stdout)
     #end
@@ -389,7 +389,7 @@ function _abelian_norm_relation(K::AnticNumberField; max_den::Int=0, full::Bool=
       @vtime :NormRelation 3 S, mS = simplify(L, cached=false)
       flush(stdout)
 
-      Hecke.set_automorphisms(S, [mS * aut * inv(mS) for aut in automorphisms(L)])
+      Hecke.set_automorphisms(S, [mS * aut * inv(mS) for aut in automorphism_list(L)])
       L, mL = (S, mS * mL)
     end
     push!(N.subs, (L, mL))
@@ -398,7 +398,7 @@ function _abelian_norm_relation(K::AnticNumberField; max_den::Int=0, full::Bool=
   return N
 end
 
-function abelian_norm_relation(K::AnticNumberField; max_den::Int=0, full::Bool=false)
+function abelian_norm_relation(K::AbsSimpleNumField; max_den::Int=0, full::Bool=false)
   N = _abelian_norm_relation(K, max_den=max_den, full=full)
   if istrivial(N)
     return false, NormRelation{Int}()
@@ -414,16 +414,16 @@ end
 #
 ################################################################################
 
-function get_hecke_norm_relation(N::AbNormRelation{AnticNumberField})
+function get_hecke_norm_relation(N::AbNormRelation{AbsSimpleNumField})
   K = N.base
   z = Hecke.NormRel.NormRelation{Int}()
   z.K = K
   n = length(N)
   z.is_normal = trues(n)
-  z.subfields = Vector{Tuple{AnticNumberField, NfToNfMor}}(undef, n)
+  z.subfields = Vector{Tuple{AbsSimpleNumField, NumFieldHom}}(undef, n)
   z.denominator = denominator(N)
   z.ispure = true
-  z.embed_cache_triv = Vector{Dict{nf_elem, nf_elem}}(undef, n)
+  z.embed_cache_triv = Vector{Dict{AbsSimpleNumFieldElem, AbsSimpleNumFieldElem}}(undef, n)
   z.nonredundant = Vector{Int}()
   for i in 1:n
     if Bool(N.nonred[i])
@@ -435,17 +435,17 @@ function get_hecke_norm_relation(N::AbNormRelation{AnticNumberField})
     z.subfields[i] = N.subs[i]
   end
 
-  z.coefficients_gen = Vector{Vector{Tuple{Int, NfToNfMor, NfToNfMor}}}(undef, n)
+  z.coefficients_gen = Vector{Vector{Tuple{Int, NumFieldHom, NumFieldHom}}}(undef, n)
 
   ii = id_hom(K)
 
-  #coefficients_gen::Vector{Vector{Tuple{Int, NfToNfMor, NfToNfMor}}}
+  #coefficients_gen::Vector{Vector{Tuple{Int, NumFieldHom, NumFieldHom}}}
   for i in 1:n
     z.coefficients_gen[i] = [(N.coeffs[i], ii, ii)]
   end
 
   for i in 1:n
-    z.embed_cache_triv[i] = Dict{nf_elem, nf_elem}()
+    z.embed_cache_triv[i] = Dict{AbsSimpleNumFieldElem, AbsSimpleNumFieldElem}()
   end
 
   return z

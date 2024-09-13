@@ -8,7 +8,7 @@ function test_ideal_svp(conductors=[], iterations=10, bound=1000)
   for i in 1:length(conductors)
     m = conductors[i]
     @info "Conductor = $m"
-    K, a = CyclotomicField(m)
+    K, a = cyclotomic_field(m)
     OK = lll(maximal_order(K))
 
     @info "Computing minus part: "

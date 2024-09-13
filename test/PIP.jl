@@ -6,7 +6,7 @@ set_verbose_level(:PIP, 2)
 
 
 function cache_setup(m; s=[])
-  K, a = CyclotomicField(m)
+  K, a = cyclotomic_field(m)
   OK = lll(maximal_order(K))
 
   if isempty(s)

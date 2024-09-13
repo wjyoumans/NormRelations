@@ -3,7 +3,7 @@ set_verbose_level(:NormRelCache, 2)
 set_verbose_level(:Decompose, 3)
 
 function cache_setup(m; s=[])
-  K, a = CyclotomicField(m)
+  K, a = cyclotomic_field(m)
   OK = lll(maximal_order(K))
 
   if isempty(s)

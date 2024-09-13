@@ -1,6 +1,6 @@
 
 # Return column vector of log embeddings of x.
-function log_embedding(x::FacElem{nf_elem, AnticNumberField},
+function log_embedding(x::FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField},
     A::ArbField=ArbField(100), 
     project::Bool=true)
 
@@ -14,7 +14,7 @@ end
 
 # compute lattice of log embeddings (including projecting onto Log(U) tensor R).
 function log_embedding_lattice(
-    U::Vector{FacElem{nf_elem, AnticNumberField}},
+    U::Vector{FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}},
     A::ArbField=ArbField(100);
     project::Bool=true)
 

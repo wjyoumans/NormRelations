@@ -20,7 +20,7 @@ end
 # Elements alpha of the group ring Z[G] act on ideals of OK by
 # A^alpha = prod(sigma_i(a)^alpha_i) for sigma_i in G, the galois group of
 # the field.
-function apply_stickelberger(A::NfOrdIdl, alpha::fmpz_mat; galgrp=nothing)
+function apply_stickelberger(A::AbsSimpleNumFieldOrderIdeal, alpha::ZZMatrix; galgrp=nothing)
   K = nf(A)
   b, m = Hecke.is_cyclotomic_type(K)
   @assert b
@@ -54,7 +54,7 @@ end
 # Return the matrix whose columns are generators of the Stickelberger ideal.
 function stickelberger_generators(m; galgrp=unit_group(ResidueRing(ZZ, m)))
   G, mG = galgrp
-  V = Vector{fmpz}[]
+  V = Vector{ZZRingElem}[]
   t1 = stickelberger_element(1, m, galgrp=galgrp)
   for a = 2:m
     ta = stickelberger_element(a, m, galgrp=galgrp)
@@ -66,7 +66,7 @@ end
 # Return the matrix whose columns are short generators of the Stickelberger ideal
 function short_stickelberger_generators(m; galgrp=unit_group(ResidueRing(ZZ, m)))
   G, mG = galgrp
-  V = Vector{fmpz}[]
+  V = Vector{ZZRingElem}[]
   t1 = stickelberger_element(1, m, galgrp=galgrp)
   for a = 1:m
     ta = stickelberger_element(a, m, galgrp=galgrp)
@@ -101,7 +101,7 @@ function project(x, mH, tau; basis=[])
   end
   #transversal = [mH\h for h in H]
   
-  res = fmpz[0 for i in 1:length(H)]
+  res = ZZRingElem[0 for i in 1:length(H)]
   for (i, g) in enumerate(G)
     j = findfirst(isequal(g), basis)
     if j !== nothing
@@ -124,7 +124,7 @@ function projection(mH, tau)
   G = domain(mH)
   H = codomain(mH)
 
-  x = fmpz[0 for i in 1:length(G)]
+  x = ZZRingElem[0 for i in 1:length(G)]
   M = zero_matrix(ZZ, length(H), length(G))
   basis = [mH\h for h in H]
   for i in 1:length(G)
@@ -141,7 +141,7 @@ end
 # Given an element alpha of Z[G] find beta in Z[G] with 1-norm less or equal
 # to (1/4)*phi(m)^(3/2) with C^beta = C^alpha for any class C in the minus part
 # of the class group.
-function reduce(alpha::fmpz_mat, m; galgrp=unit_group(ResidueRing(ZZ, m)), 
+function reduce(alpha::ZZMatrix, m; galgrp=unit_group(ResidueRing(ZZ, m)), 
     W=short_stickelberger_generators(m, galgrp=galgrp))
 
   @vprint :Stickelberger 1 "Checking element size before reducing.\n"

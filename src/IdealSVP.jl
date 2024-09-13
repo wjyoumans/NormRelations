@@ -4,7 +4,7 @@
 # If precision = 0 try to use low precision.
 # If precision = -1 use enough to gaurauntee short generator.
 # Otherwise set precision manually.
-function short_associate(g::FacElem{nf_elem,AnticNumberField}; precision=0)
+function short_associate(g::FacElem{AbsSimpleNumFieldElem,AbsSimpleNumField}; precision=0)
   K = base_ring(g)
   b, m = Hecke.is_cyclotomic_type(K)
   @assert b
@@ -42,7 +42,7 @@ end
 
 # Find a mildly short vector of A assuming A is principal.
 function principal_ideal_svp(
-    A::NfOrdIdl;
+    A::AbsSimpleNumFieldOrderIdeal;
     cache::NormRelCache = NormRelCache())
 
   if has_norm_relation(cache)
@@ -60,8 +60,8 @@ end
 
 # Find a mildly short vector of an arbitrary ideal A.
 function ideal_svp(
-    A::NfOrdIdl,
-    S::Vector{NfOrdIdl},
+    A::AbsSimpleNumFieldOrderIdeal,
+    S::Vector{AbsSimpleNumFieldOrderIdeal},
     B::Int,
     d::Int;
     parisizemax=PARISIZEMAX,
@@ -83,7 +83,7 @@ end
 
 # Find a mildly short vector of an arbitrary ideal A.
 function ideal_svp(
-    A::NfOrdIdl; 
+    A::AbsSimpleNumFieldOrderIdeal; 
     parisizemax=PARISIZEMAX,
     stable=STABLE,
     strategy=:classic,

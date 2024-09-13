@@ -1,7 +1,7 @@
 
 #=
 # decisional PIP using ideal decomposition
-function is_principal(A::NfOrdIdl, f::MapSUnitGrpFacElem, N::NormRelation; 
+function is_principal(A::AbsSimpleNumFieldOrderIdeal, f::MapSUnitGrpFacElem, N::NormRelation; 
     stable=10, strategy=:classic, lifts=false, parisizemax=1000000000)
   AK = abelian_group(f)
   _, v = decompose(A, f.idl, N, stable=stable, strategy=strategy, sunit_group_map=f, 
@@ -10,7 +10,7 @@ function is_principal(A::NfOrdIdl, f::MapSUnitGrpFacElem, N::NormRelation;
 end
 
 # decisional PIP using ideal decomposition
-function Hecke.is_principal(A::NfOrdIdl, f::MapSUnitGrpFacElem)
+function Hecke.is_principal(A::AbsSimpleNumFieldOrderIdeal, f::MapSUnitGrpFacElem)
   AK = abelian_group(f)
   _, v = decompose(A, f.idl)
   return iszero(AK(v))
@@ -21,12 +21,11 @@ end
 
 # decisional PIP using ideal decomposition. S must generate the class group.
 function decisional_pip(
-    A::NfOrdIdl, 
-    S::Vector{NfOrdIdl},
+    A::AbsSimpleNumFieldOrderIdeal, 
+    S::Vector{AbsSimpleNumFieldOrderIdeal},
     stable=STABLE, 
     parisizemax=PARISIZEMAX,
-    strategy=:classic) where T <: Union{NfOrdIdl, FacElem{NfOrdIdl}}
-
+    strategy=:classic)
   cache = norm_relation_cache(S)
   return decisional_pip(A, cache=cache, stable=stable, parisizemax=parisizemax, 
 			strategy=strategy)
@@ -35,11 +34,11 @@ end
 # decisional PIP using ideal decomposition. S must generate the class group.
 function decisional_pip(
     A::T, 
-    S::Vector{NfOrdIdl}, 
+    S::Vector{AbsSimpleNumFieldOrderIdeal}, 
     N::NormRelation,
     stable=STABLE, 
     parisizemax=PARISIZEMAX,
-    strategy=:classic) where T <: Union{NfOrdIdl, FacElem{NfOrdIdl}}
+    strategy=:classic) where T <: Union{AbsSimpleNumFieldOrderIdeal, FacElem{AbsSimpleNumFieldOrderIdeal}}
 
   cache = norm_relation_cache(S, N)
   return decisional_pip(A, cache=cache, stable=stable, parisizemax=parisizemax, 
@@ -47,7 +46,7 @@ function decisional_pip(
 end
 
 function decisional_pip(
-    A::FacElem{NfOrdIdl};
+    A::FacElem{AbsSimpleNumFieldOrderIdeal};
     cache::NormRelCache=NormRelCache(),
     stable=STABLE, 
     parisizemax=PARISIZEMAX,
@@ -58,7 +57,7 @@ function decisional_pip(
 end
 
 function decisional_pip(
-    A::Hecke.NfAbsOrdFracIdl;
+    A::Hecke.AbsNumFieldOrderFractionalIdeal;
     cache::NormRelCache=NormRelCache(),
     stable=STABLE, 
     parisizemax=PARISIZEMAX,
@@ -71,7 +70,7 @@ end
 # decisional PIP using ideal decomposition. The cached ideal set must generate the 
 # class group, otherwise we fall back to search-PIP.
 function decisional_pip(
-    A::NfOrdIdl;
+    A::AbsSimpleNumFieldOrderIdeal;
     cache::NormRelCache=NormRelCache(),
     stable=STABLE, 
     parisizemax=PARISIZEMAX,

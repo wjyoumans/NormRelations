@@ -1,8 +1,8 @@
 
 import Hecke.NormRel: NormRelation
 
-import Hecke: order, group, subfield, subfields, coefficients, subgroup, subgroups, 
-	      norm, istrivial, lift!
+import Hecke: order, group, subfield, subfields, coefficients, subgroups, 
+	      norm, is_trivial, lift!
 
 # Combine some functions from Hecke and Hecke.NormRel
 

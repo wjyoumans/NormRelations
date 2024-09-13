@@ -3,7 +3,7 @@ module NormRelations
 using Reexport
 @reexport using Hecke
 
-import Hecke: MapSUnitGrpFacElem, sunit_group_fac_elem
+import Hecke: MapSUnitGrpFacElem, sunit_group_fac_elem, nf
 
 # TODO: Make pari optional?
 
@@ -31,8 +31,8 @@ include("Root.jl")
 include("Saturate.jl")
 include("SUnits.jl")
 
-Base.:*(A::arb_mat, B::fmpz_mat) = A*matrix(base_ring(A), collect(B))
-Base.:*(A::fmpz_mat, B::arb_mat) = matrix(base_ring(B), collect(A))*B
+Base.:*(A::ArbMatrix, B::ZZMatrix) = A*matrix(base_ring(A), collect(B))
+Base.:*(A::ZZMatrix, B::ArbMatrix) = matrix(base_ring(B), collect(A))*B
 
 # Add additional verbose scopes. Must be initialized at runtime.
 function __init__()
@@ -53,8 +53,8 @@ function __init__()
   ]
 
   for s in scopes
-    add_verbose_scope(s)
-    add_assert_scope(s)
+    add_verbosity_scope(s)
+    add_assertion_scope(s)
   end
 end
 
