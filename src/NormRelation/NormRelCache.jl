@@ -7,11 +7,11 @@
 # Assumes all norm relations are abelian norm relations with only 2 layers of 
 # recursion (top field, subfields indexed by i, subsubfields indexed by i, j)
 mutable struct NormRelCache
-  K::AnticNumberField
-  OK::NfOrd
+  K::AbsSimpleNumField
+  OK::AbsSimpleNumFieldOrder
 
   # set of primes of OK to decompose over
-  S::Vector{NfOrdIdl}
+  S::Vector{AbsSimpleNumFieldOrderIdeal}
 
   # norm relation data for K
   N::NormRelation
@@ -19,11 +19,11 @@ mutable struct NormRelCache
   index::Int
 
   # embedding to top field if it exists
-  embedding::NfToNfMor
+  embedding::NumFieldHom
   parent_cache::NormRelCache
 
   # S-unit group of K
-  SU::GrpAbFinGen
+  SU::FinGenAbGroup
   #mSU::MapSUnitGrpFacElem
   mSU::Map
 
@@ -37,7 +37,7 @@ mutable struct NormRelCache
     return new()
   end
 
-  function NormRelCache(S::Vector{NfOrdIdl})
+  function NormRelCache(S::Vector{AbsSimpleNumFieldOrderIdeal})
     out = new()
     out.S = S
     out.OK = order(S[1])
@@ -47,7 +47,7 @@ mutable struct NormRelCache
     return out
   end
 
-  function NormRelCache(S::Vector{NfOrdIdl}, N::NormRelation)
+  function NormRelCache(S::Vector{AbsSimpleNumFieldOrderIdeal}, N::NormRelation)
     if index(N) == 0
       return NormRelCache(S)
     end
@@ -69,15 +69,15 @@ function Base.isempty(R::NormRelCache)
   return true
 end
 
-function norm_relation_cache(S::Vector{NfOrdIdl})
+function norm_relation_cache(S::Vector{AbsSimpleNumFieldOrderIdeal})
   return NormRelCache(S)
 end
 
-function norm_relation_cache(S::Vector{NfOrdIdl}, N::NormRelation)
+function norm_relation_cache(S::Vector{AbsSimpleNumFieldOrderIdeal}, N::NormRelation)
   return NormRelCache(S, N)
 end
 
-function norm_relation_cache(R::NormRelCache, S::Vector{NfOrdIdl})
+function norm_relation_cache(R::NormRelCache, S::Vector{AbsSimpleNumFieldOrderIdeal})
   SU, mSU = sunit_group_fac_elem(R)
   out = NormRelCache(S)
   out.SU, out.mSU = sunit_group_subgroup(S, SU, mSU)

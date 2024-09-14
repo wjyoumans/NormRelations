@@ -5,7 +5,7 @@
 #
 # B = poly(m), d = \tilde{O}(m)
 function walk_to_minus_part(
-    A::NfOrdIdl, 
+    A::AbsSimpleNumFieldOrderIdeal, 
     B::Int, 
     d::Int;
     cache::NormRelCache=NormRelCache(), # cache_Kp

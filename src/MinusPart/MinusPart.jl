@@ -21,7 +21,7 @@ function norm_map(
   @assert ngens(AKp) === length(SKp)
 
   g = I -> norm(embedding(cache_Kp), I, order=order(cache_Kp))
-  img = GrpAbFinGenElem[]
+  img = FinGenAbGroupElem[]
   for p in SK
     _, v = decompose(g(p), SKp, cache_Kp)
     push!(img,  AKp(v))
@@ -48,7 +48,7 @@ function _class_group_minus_part_cache_setup(OK; parisizemax=PARISIZEMAX)
   return cache
 end
 
-function _class_group_minus_part_setup(K::AnticNumberField; parisizemax=PARISIZEMAX)
+function _class_group_minus_part_setup(K::AbsSimpleNumField; parisizemax=PARISIZEMAX)
   
   b, m = Hecke.is_cyclotomic_type(K)
   @assert b
@@ -69,7 +69,7 @@ function _class_group_minus_part_setup(K::AnticNumberField; parisizemax=PARISIZE
 end
 
 function class_group_minus_part(
-    K::AnticNumberField; 
+    K::AbsSimpleNumField; 
     parisizemax=PARISIZEMAX, 
     stable=STABLE, 
     strategy=:classic)

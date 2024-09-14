@@ -24,7 +24,7 @@ function test_minus_part(conductors=[])
   for i in 1:length(conductors)
     m = conductors[i]
     @info "Conductor = $m"
-    K, a = CyclotomicField(m)
+    K, a = cyclotomic_field(m)
 
     @info "Minus part: "
     @time ker, kermap, c1, c2 = class_group_minus_part(K)
@@ -40,7 +40,7 @@ function test_generating_set(conductors=[])
   end
   for m in conductors
     @info "Conductor = $m"
-    K, _ = CyclotomicField(m)
+    K, _ = cyclotomic_field(m)
     
     @info "Minus part:"
     @time ker, kermap, c1, c2 = class_group_minus_part(K)
@@ -65,7 +65,7 @@ function test_random_walk(conductors=[], iterations=10)
   #assert A*B in Cl_K^- i.e. N_{K/K^+}(A*B) principal
   for m in conductors
     @info "Conductor = $m"
-    K, _ = CyclotomicField(m)
+    K, _ = cyclotomic_field(m)
     
     @info "Minus part:"
     @time ker, kermap, c1, c2 = class_group_minus_part(K)
@@ -99,7 +99,7 @@ function test_prime_ideal_cpm(conductors=[], norm_bound=1000, iterations=10)
   
   for m in conductors
     @info "Conductor = $m"
-    K, _ = CyclotomicField(m)
+    K, _ = cyclotomic_field(m)
     n = degree(K)
 
     @info "Setting up cache:"
@@ -134,7 +134,7 @@ function test_cpm(conductors=[])
   
   for m in conductors
     @info "Conductor = $m"
-    K, _ = CyclotomicField(m)
+    K, _ = cyclotomic_field(m)
     OK = lll(maximal_order(K))
 
     minus_part = class_group_minus_part(K)

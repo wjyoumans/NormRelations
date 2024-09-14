@@ -11,7 +11,7 @@ end
 # minus part of the class group and an element alpha of the group ring Z[G]. 
 # Returns an integral ideal B such that P^alpha * B is principal and 
 # N(B) = N(P)^(O(phi(m)^(3/2))).
-function close_principal_multiple(P::NfOrdIdl, alpha::fmpz_mat; galgrp=nothing)
+function close_principal_multiple(P::AbsSimpleNumFieldOrderIdeal, alpha::ZZMatrix; galgrp=nothing)
   K = nf(P)
   n = degree(K)
   b, m = Hecke.is_cyclotomic_type(K)
@@ -51,7 +51,7 @@ end
 
 # S any set of prime ideals generating the minus part of the class group
 function close_principal_multiple(
-    A::NfOrdIdl;
+    A::AbsSimpleNumFieldOrderIdeal;
     parisizemax=PARISIZEMAX,
     stable=STABLE,
     strategy=:classic,
@@ -68,8 +68,8 @@ end
 
 # S any set of prime ideals generating the minus part of the class group
 function close_principal_multiple(
-    A::NfOrdIdl,
-    S::Vector{NfOrdIdl},
+    A::AbsSimpleNumFieldOrderIdeal,
+    S::Vector{AbsSimpleNumFieldOrderIdeal},
     B::Int,
     d::Int;
     parisizemax=PARISIZEMAX,

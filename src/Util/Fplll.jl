@@ -4,7 +4,7 @@ function l1_norm(L)
   maximum([sum([abs(x) for x in L[:,i]]) for i in 1:ncols(L)])
 end
 
-function l2_norm(B::arb_mat)
+function l2_norm(B::ArbMatrix)
   @assert ncols(B) == 1
   return sqrt(dot(B, B))
 end
@@ -42,26 +42,26 @@ function delete_col(M, i)
   end
 end
 
-# Find the minimum working precision of the elements of an arb_mat
-function working_precision(A::arb_mat)
+# Find the minimum working precision of the elements of an ArbMatrix
+function working_precision(A::ArbMatrix)
   return Int(minimum([log2(denominator(Hecke._arb_get_fmpq(x))) for x in A if !iszero(x)]))
 end
 
-function arb_mat_to_fmpz_mat(A::arb_mat; prec::Int=precision(parent(A[1,1])))
-  scale = fmpz(2)^prec
+function arb_mat_to_fmpz_mat(A::ArbMatrix; prec::Int=precision(parent(A[1,1])))
+  scale = ZZRingElem(2)^prec
   return map(x -> numerator(Hecke._arb_get_fmpq(x)*scale), A), prec
 end
 
-function fmpz_mat_to_arb_mat(B::fmpz_mat, prec::Int; scale=false)
+function fmpz_mat_to_arb_mat(B::ZZMatrix, prec::Int; scale=false)
   A = ArbField(prec)
   if scale
-    s = fmpz(2)^prec
+    s = ZZRingElem(2)^prec
     return map(x -> A(x)//s, B)
   end
   return map(x -> A(x), B)
 end
 
-function save_fmpz_mat(B::fmpz_mat, filename)
+function save_fmpz_mat(B::ZZMatrix, filename)
   open(filename, "w") do io
     write(io, "[")
     for i in 1:nrows(B)
@@ -81,7 +81,7 @@ function load_fmpz_mat(nrows, ncols, filename)
         break
       end
       i += 1
-      B[i,:] = map(x->fmpz(String(x)), row)
+      B[i,:] = map(x->ZZRingElem(String(x)), row)
     end
   end
   @assert(i == nrows)
@@ -128,7 +128,7 @@ end
 
 # gaussian heuristic (expected first minimum) of matrix B whose columns are basis vectors for 
 # a lattice L
-function gaussian_heuristic(B::arb_mat, v=volume(B)) 
+function gaussian_heuristic(B::ArbMatrix, v=volume(B)) 
   A = parent(B[1,1])
   n = ncols(B)
   return sqrt(n/(2*A(pi)*A(exp(1))))*(v^(1/n))
@@ -154,7 +154,7 @@ function log_orthogonality_defect(B, v=volume(B))
 end
 
 # volume of the lattice spanned by columns of B
-function Hecke.volume(B::fmpz_mat)
+function Hecke.volume(B::ZZMatrix)
   if issquare(B)
     return abs(det(B))*1.0
   end
@@ -162,14 +162,14 @@ function Hecke.volume(B::fmpz_mat)
 end
 
 # volume of the lattice spanned by columns of B
-function Hecke.volume(B::arb_mat)
+function Hecke.volume(B::ArbMatrix)
   if issquare(B)
     return abs(det(B))
   end
   return sqrt(abs(det(transpose(B)*B)))
 end
 
-function is_lll_reduced(B::arb_mat; delta::arb=parent(B[1,1])(0.99), eta::arb=parent(B[1,1])(0.51))
+function is_lll_reduced(B::ArbMatrix; delta::ArbFieldElem=parent(B[1,1])(0.99), eta::ArbFieldElem=parent(B[1,1])(0.51))
   A = parent(B[1,1])
   d = ncols(B)
 
@@ -242,7 +242,7 @@ end
 
 # rows are basis vectors!
 
-function fplll_preprocess(B::fmpz_mat)
+function fplll_preprocess(B::ZZMatrix)
   out = ["["]
   for i=1:nrows(B)
     push!(out, string(B[i,:]))
@@ -252,7 +252,7 @@ function fplll_preprocess(B::fmpz_mat)
 end
 
 #= why is this slower when it doesnt use files?
-function test_fplll(B::fmpz_mat; filename="fplll", eta=0.51, delta=0.99)
+function test_fplll(B::ZZMatrix; filename="fplll", eta=0.51, delta=0.99)
   input = fplll_preprocess(B)
   io = IOBuffer()
 
@@ -264,7 +264,7 @@ function test_fplll(B::fmpz_mat; filename="fplll", eta=0.51, delta=0.99)
 end
 =#
 
-function fplll(B::fmpz_mat; filename="fplll", eta=0.51, delta=0.99)
+function fplll(B::ZZMatrix; filename="fplll", eta=0.51, delta=0.99)
   save_fmpz_mat(B, "$(filename).in")
   @vprint :NormRelation 1 "Calling fplll.\n"
   @vtime :NormRelation 1 run(
@@ -273,13 +273,13 @@ function fplll(B::fmpz_mat; filename="fplll", eta=0.51, delta=0.99)
   return B
 end
 
-function fplll(A::arb_mat; filename="fplll", eta=0.51, delta=0.99)
+function fplll(A::ArbMatrix; filename="fplll", eta=0.51, delta=0.99)
   B, prec = arb_mat_to_fmpz_mat(A)
   B = fplll(B, filename=filename, eta=eta, delta=delta)
   return fmpz_mat_to_arb_mat(B, prec, scale=true)
 end
 
-function svp(B::fmpz_mat; filename="fplll")
+function svp(B::ZZMatrix; filename="fplll")
   save_fmpz_mat(B, "$(filename).in")
   @vprint :NormRelation 1 "Calling fplll.\n"
   @vtime :NormRelation 1 run(
@@ -288,7 +288,7 @@ function svp(B::fmpz_mat; filename="fplll")
   return B
 end
 
-function cvp(B::fmpz_mat, target::fmpz_mat; filename="fplll")
+function cvp(B::ZZMatrix, target::ZZMatrix; filename="fplll")
   save_fmpz_mat(B, "$(filename).in")
   open("$(filename).in", "a") do f
     write(f, string(target))
@@ -305,7 +305,7 @@ end
 # LLL/BKZ/HKZ/SVP
 ########################################################################
 
-function fplll(B::fmpz_mat; filename="fplll", eta=0.51, delta=0.99)
+function fplll(B::ZZMatrix; filename="fplll", eta=0.51, delta=0.99)
   save_fmpz_mat(transpose(B), "$(filename).in")
   @vprint :NormRelation 1 "Calling fplll.\n"
   @vtime :NormRelation 1 run(
@@ -314,20 +314,20 @@ function fplll(B::fmpz_mat; filename="fplll", eta=0.51, delta=0.99)
   return B
 end
 
-function fplll(A::arb_mat; filename="fplll", eta=0.51, delta=0.99)
+function fplll(A::ArbMatrix; filename="fplll", eta=0.51, delta=0.99)
   B, prec = arb_mat_to_fmpz_mat(A)
   B = fplll(B, filename=filename, eta=eta, delta=delta)
   return fmpz_mat_to_arb_mat(B, prec, scale=true)
 end
 
-function flint_lll(A::arb_mat)
+function flint_lll(A::ArbMatrix)
   B, prec = arb_mat_to_fmpz_mat(A)
   B = transpose(Hecke.lll(transpose(B)))
   return fmpz_mat_to_arb_mat(B, prec, scale=true)
 end
 
 # Does initial LLL reduction unless nolll=true
-function bkz(B::fmpz_mat, block_size; filename="fplll")
+function bkz(B::ZZMatrix, block_size; filename="fplll")
   save_fmpz_mat(transpose(B), "$(filename).in")
   @vprint :NormRelation 1 "Calling fplll.\n"
   @vtime :NormRelation 1 run(pipeline(`fplll -a bkz -b $(block_size) $(filename).in`, 
@@ -337,13 +337,13 @@ function bkz(B::fmpz_mat, block_size; filename="fplll")
 end
 
 # Does initial LLL reduction unless nolll=true
-function bkz(A::arb_mat, block_size; filename="fplll")
+function bkz(A::ArbMatrix, block_size; filename="fplll")
   B, prec = arb_mat_to_fmpz_mat(A)
   B = old_bkz(B, block_size, filename=filename)
   return fmpz_mat_to_arb_mat(B, prec, scale=true)
 end
 
-function wip_fplll_with_transform(B::fmpz_mat; filename="fplll", eta=0.51, delta=0.99)
+function wip_fplll_with_transform(B::ZZMatrix; filename="fplll", eta=0.51, delta=0.99)
   save_fmpz_mat(transpose(B), "$(filename).in")
   @vprint :NormRelation 1 "Calling fplll.\n"
   @vtime :NormRelation 1 run(
@@ -355,23 +355,23 @@ function wip_fplll_with_transform(B::fmpz_mat; filename="fplll", eta=0.51, delta
   return B*U, U
 end
 
-function wip_fplll_with_transform(A::arb_mat; filename="fplll", eta=0.51, delta=0.99)
+function wip_fplll_with_transform(A::ArbMatrix; filename="fplll", eta=0.51, delta=0.99)
   B, _ = arb_mat_to_fmpz_mat(A)
   _, U = fplll_with_transform(B, filename=filename, eta=eta, delta=delta)
   return A*U, U
 end
 
-function wip_fplll(B::fmpz_mat; filename="fplll", eta=0.51, delta=0.99)
+function wip_fplll(B::ZZMatrix; filename="fplll", eta=0.51, delta=0.99)
   B, _ = fplll_with_transform(B, filename=filename, eta=eta, delta=delta)
   return B
 end
 
-function wip_fplll(B::arb_mat; filename="fplll", eta=0.51, delta=0.99)
+function wip_fplll(B::ArbMatrix; filename="fplll", eta=0.51, delta=0.99)
   B, _ = fplll_with_transform(B, filename=filename, eta=eta, delta=delta)
   return B
 end
 
-function wip_bkz_with_transform(B::fmpz_mat, block_size::Int; filename="fplll", max_loops::Int=0)
+function wip_bkz_with_transform(B::ZZMatrix, block_size::Int; filename="fplll", max_loops::Int=0)
   save_fmpz_mat(transpose(B), "$(filename).in")
   @vprint :NormRelation 1 "Calling fplll.\n"
   if max_loops == 0
@@ -391,24 +391,24 @@ function wip_bkz_with_transform(B::fmpz_mat, block_size::Int; filename="fplll", 
   return B*U, U
 end
 
-function wip_bkz_with_transform(A::arb_mat, block_size::Int; filename="fplll", max_loops::Int=0)
+function wip_bkz_with_transform(A::ArbMatrix, block_size::Int; filename="fplll", max_loops::Int=0)
   B, _ = arb_mat_to_fmpz_mat(A)
   _, U = bkz_with_transform(B, block_size, filename=filename, max_loops=max_loops)
   return A*U, U
 end
 
-function wip_bkz(B::fmpz_mat, block_size::Int; filename="fplll", max_loops::Int=0)
+function wip_bkz(B::ZZMatrix, block_size::Int; filename="fplll", max_loops::Int=0)
   B, _ = bkz_with_transform(B, block_size, filename=filename, max_loops=max_loops)
   return B
 end
 
-function wip_bkz(B::arb_mat, block_size::Int; filename="fplll", max_loops::Int=0)
+function wip_bkz(B::ArbMatrix, block_size::Int; filename="fplll", max_loops::Int=0)
   B, _ = bkz_with_transform(B, block_size, filename=filename, max_loops=max_loops)
   return B
 end
 =#
 
-#function svp(B::fmpz_mat, filename="fplll")
+#function svp(B::ZZMatrix, filename="fplll")
 #  save_fmpz_mat(transpose(B), "$(filename).in")
 #  @vprint :NormRelation 1 "Calling fplll.\n"
 #  @vtime :NormRelation 1 run(
@@ -417,13 +417,13 @@ end
 #  return B
 #end
 #
-#function svp(A::arb_mat, filename="fplll")
+#function svp(A::ArbMatrix, filename="fplll")
 #  B, prec = arb_mat_to_fmpz_mat(A)
 #  B = svp(B, filename)
 #  return fmpz_mat_to_arb_mat(B, prec, scale=true)
 #end
 #
-#function mylll(B::fmpz_mat, filename="fplll"; eta=0.51, delta=0.99)
+#function mylll(B::ZZMatrix, filename="fplll"; eta=0.51, delta=0.99)
 #  save_fmpz_mat(transpose(B), "$(filename).in")
 #  @vprint :NormRelation 1 "Calling fplll.\n"
 #  @vtime :NormRelation 1 run(
@@ -432,13 +432,13 @@ end
 #  return B
 #end
 #
-#function Hecke.lll(A::arb_mat, filename="fplll"; eta=0.51, delta=0.99)
+#function Hecke.lll(A::ArbMatrix, filename="fplll"; eta=0.51, delta=0.99)
 #  B, prec = arb_mat_to_fmpz_mat(A)
 #  B = Hecke.lll(B, filename, eta=eta, delta=delta)
 #  return fmpz_mat_to_arb_mat(B, prec, scale=true)
 #end
 #
-#function hlll(B::fmpz_mat, filename="fplll"; eta=0.51, delta=0.99)
+#function hlll(B::ZZMatrix, filename="fplll"; eta=0.51, delta=0.99)
 #  save_fmpz_mat(transpose(B), "$(filename).in")
 #  @vprint :NormRelation 1 "Calling fplll.\n"
 #  @vtime :NormRelation 1 run(
@@ -447,14 +447,14 @@ end
 #  return B
 #end
 #
-#function hlll(A::arb_mat, filename="fplll"; eta=0.51, delta=0.99)
+#function hlll(A::ArbMatrix, filename="fplll"; eta=0.51, delta=0.99)
 #  B, prec = arb_mat_to_fmpz_mat(A)
 #  B = Hecke.hlll(B, filename, eta=eta, delta=delta)
 #  return fmpz_mat_to_arb_mat(B, prec, scale=true)
 #end
 #
 ## Does initial LLL reduction unless nolll=true
-#function bkz(B::fmpz_mat, block_size, filename="fplll"; nolll=false)
+#function bkz(B::ZZMatrix, block_size, filename="fplll"; nolll=false)
 #  save_fmpz_mat(transpose(B), "$(filename).in")
 #  @vprint :NormRelation 1 "Calling fplll.\n"
 #  if nolll
@@ -469,14 +469,14 @@ end
 #end
 #
 ## Does initial LLL reduction unless nolll=true
-#function bkz(A::arb_mat, block_size, filename="fplll"; nolll=false)
+#function bkz(A::ArbMatrix, block_size, filename="fplll"; nolll=false)
 #  B, prec = arb_mat_to_fmpz_mat(A)
 #  B = bkz(B, block_size, filename, nolll=nolll)
 #  return fmpz_mat_to_arb_mat(B, prec, scale=true)
 #end
 #
 ## Does initial LLL reduction
-#function hkz(B::fmpz_mat, block_size, filename="fplll")
+#function hkz(B::ZZMatrix, block_size, filename="fplll")
 #  save_fmpz_mat(transpose(B), "$(filename).in")
 #  @vprint :NormRelation 1 "Calling fplll.\n"
 #  @vtime :NormRelation 1 run(pipeline(`fplll -a hkz -b $(block_size) $(filename).in`, 
@@ -486,7 +486,7 @@ end
 #end
 #
 ## Does initial LLL reduction
-#function hkz(A::arb_mat, block_size, filename="fplll")
+#function hkz(A::ArbMatrix, block_size, filename="fplll")
 #  B, prec = arb_mat_to_fmpz_mat(A)
 #  B = hkz(B, block_size, filename)
 #  return fmpz_mat_to_arb_mat(B, prec, scale=true)
@@ -501,15 +501,15 @@ end
 # - precision: "asymptotically, when (delta, eta) close to (1, 1/2), a floating point precision of 
 #   1.6*d suffices". So if you're not sure, produce B with arbs of precision > 1.6*d (d = number
 #   of basis vectors)
-function my_lll!(B::arb_mat; delta::arb=parent(B[1,1])(0.99), eta::arb=parent(B[1,1])(0.51))
+function my_lll!(B::ArbMatrix; delta::ArbFieldElem=parent(B[1,1])(0.99), eta::ArbFieldElem=parent(B[1,1])(0.51))
   A = parent(B[1,1])
   d::Int = ncols(B)
 
   eta_bar = (eta + 1/2)/2 # should be -1/2 ...?
   delta_bar = (delta + 1)/2
   
-  mu::arb_mat = identity_matrix(A, d)
-  r = Vector{arb}(undef, d)
+  mu::ArbMatrix = identity_matrix(A, d)
+  r = Vector{ArbFieldElem}(undef, d)
 
   G = gram_schmidt(B)
   r[1] = dot(B[:,1], B[:,1])
@@ -545,7 +545,7 @@ function my_lll!(B::arb_mat; delta::arb=parent(B[1,1])(0.99), eta::arb=parent(B[
   end
 end
 
-function my_lll(B::arb_mat; delta::arb=parent(B[1,1])(0.99), eta::arb=parent(B[1,1])(0.51))
+function my_lll(B::ArbMatrix; delta::ArbFieldElem=parent(B[1,1])(0.99), eta::ArbFieldElem=parent(B[1,1])(0.51))
   BB = deepcopy(B)
   my_lll!(BB)
   return BB

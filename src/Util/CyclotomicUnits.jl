@@ -5,7 +5,7 @@
 # basis of theorem 4.2 in [??].
 #
 # TODO: fails for m = 30, 42, 60, 70, 90, ... (3+ factors? 66 not included?)
-function short_cyclotomic_units(K::AnticNumberField)
+function short_cyclotomic_units(K::AbsSimpleNumField)
   b, m = Hecke.iscyclotomic_type(K)
   @assert b
   z = gen(K)
@@ -57,7 +57,7 @@ function short_cyclotomic_units(K::AnticNumberField)
 
   J = []
   # compute generators v_j
-  C = Vector{FacElem{nf_elem, AnticNumberField}}()
+  C = Vector{FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}}()
   for j in X
     if j in D
       continue
@@ -82,7 +82,7 @@ function short_cyclotomic_units(K::AnticNumberField)
 end
 
 # all short cyclotomic units, not independent
-function _short_cyclotomic_units(K::AnticNumberField)
+function _short_cyclotomic_units(K::AbsSimpleNumField)
   b, m = Hecke.iscyclotomic_type(K)
   @assert b
   z = gen(K)
@@ -94,7 +94,7 @@ function _short_cyclotomic_units(K::AnticNumberField)
   M = [divexact(m, Q[i]) for i in 1:k]
 
   # compute generators v_j
-  C = Vector{FacElem{nf_elem, AnticNumberField}}()
+  C = Vector{FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}}()
   for j in 1:m-1
     den = K(1)
     for i in 1:k

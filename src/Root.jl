@@ -1,7 +1,7 @@
-import Hecke: ispower, roots
+import Hecke: is_power, roots
 
-function _ispower_mod_units_prime(units::Vector{FacElem{nf_elem, AnticNumberField}},
-                                  beta::FacElem{nf_elem, AnticNumberField},
+function _ispower_mod_units_prime(units::Vector{FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}},
+                                  beta::FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField},
                                   d::Int;
                                   stable = 10, trager = true,
                                   write = false, decom = false, strategy = :classic)
@@ -17,7 +17,7 @@ function _ispower_mod_units_prime(units::Vector{FacElem{nf_elem, AnticNumberFiel
     return false, beta
   end
 
-  B = zero_matrix(GF(d, cached = false), n, ncols(A))
+  B = zero_matrix(Hecke.Nemo.Native.GF(d, cached = false), n, ncols(A))
 
   k = 0
   for i in 1:nrows(A)
@@ -54,9 +54,9 @@ function _ispower_mod_units_prime(units::Vector{FacElem{nf_elem, AnticNumberFiel
       save_factored_element(candidate, write)
     end
     if decom != false
-      @vtime :NormRelation 1 b, r = ispower(candidate, d, trager = trager, decom = decom.fac)
+      @vtime :NormRelation 1 b, r = is_power(candidate, d, trager = trager, decom = decom.fac)
     else
-      @vtime :NormRelation 1 b, r = ispower(candidate, d, trager = trager)
+      @vtime :NormRelation 1 b, r = is_power(candidate, d, trager = trager)
     end
     if b return (b, r) end
   end
@@ -72,7 +72,7 @@ function _ispower_mod_units_prime(units::Vector{FacElem{nf_elem, AnticNumberFiel
 end
 
 # given factored element beta and integer d, seach for a unit u such that u*beta is a dth power
-function _ispower_mod_units_generic(units::Vector{FacElem{nf_elem, AnticNumberField}}, beta::FacElem{nf_elem, AnticNumberField}, d::Int; stable = 10, trager = true, write = false, decom = false, strategy = :classic)
+function _ispower_mod_units_generic(units::Vector{FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}}, beta::FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}, d::Int; stable = 10, trager = true, write = false, decom = false, strategy = :classic)
   R = copy(units)
   push!(R, beta)
   len = length(R)
@@ -85,7 +85,7 @@ function _ispower_mod_units_generic(units::Vector{FacElem{nf_elem, AnticNumberFi
     return false, beta
   end
 
-  B = zero_matrix(ResidueRing(FlintZZ, d, cached = false), n, ncols(A))
+  B = zero_matrix(residue_ring(FlintZZ, d, cached = false)[1], n, ncols(A))
 
   k = 0
   for i in 1:nrows(A)
@@ -115,7 +115,7 @@ function _ispower_mod_units_generic(units::Vector{FacElem{nf_elem, AnticNumberFi
   good_rows = 0
 
   for i in 1:nrows(B)
-    if !isunit(B[i, ncols(B)])
+    if !is_unit(B[i, ncols(B)])
       continue
     end
     good_rows += 1
@@ -141,9 +141,9 @@ function _ispower_mod_units_generic(units::Vector{FacElem{nf_elem, AnticNumberFi
       save_factored_element(candidate, write)
     end
     if decom == false
-      @vtime :NormRelation 1 b, r = ispower(candidate, d, trager = trager)
+      @vtime :NormRelation 1 b, r = is_power(candidate, d, trager = trager)
     else
-      @vtime :NormRelation 1 b, r = ispower(candidate, d, trager = trager, decom = decom.fac)
+      @vtime :NormRelation 1 b, r = is_power(candidate, d, trager = trager, decom = decom.fac)
     end
     if b return (b, r) end
   end
@@ -157,18 +157,18 @@ function _ispower_mod_units_generic(units::Vector{FacElem{nf_elem, AnticNumberFi
 end
 
 
-function _ispower_mod_units_bad(units::Vector{FacElem{nf_elem, AnticNumberField}},
-                                beta::FacElem{nf_elem, AnticNumberField}, d::Int;
+function _ispower_mod_units_bad(units::Vector{FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}},
+                                beta::FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}, d::Int;
                                 stable = 10, trager = true,
                                 write = false, decom = decom, strategy = :classic)
   # This is the bad case
-  e = clog(fmpz(d), 2)
+  e = clog(ZZRingElem(d), 2)
   @assert 2^e == d
   @vprint :NormRelation 1 "Have to saturate and compute $e square roots\n"
   # We first saturate the units.
   # Use the saturate function of Hecke
   O = lll(maximal_order(base_ring(beta)))
-  U = Hecke.UnitGrpCtx{FacElem{nf_elem, AnticNumberField}}(O)
+  U = Hecke.UnitGrpCtx{FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}}(O)
   add_again = eltype(units)[]
 
   for u in units
@@ -189,7 +189,7 @@ function _ispower_mod_units_bad(units::Vector{FacElem{nf_elem, AnticNumberField}
   cur_reg = Hecke.tentative_regulator(U)
 
   # initialize a dummy class group context
-  c = Hecke.class_group_init(O, 1, complete = false, use_aut = true)::Hecke.ClassGrpCtx{SMat{fmpz}}
+  c = Hecke.class_group_init(O, 1, complete = false, use_aut = true)::Hecke.ClassGrpCtx{SMat{ZZRingElem}}
 
   fl = _saturate!(c, U, 2)
 
@@ -236,19 +236,19 @@ function _ispower_mod_units_bad(units::Vector{FacElem{nf_elem, AnticNumberField}
 end
 
 # given factored element beta and integer d, seach for a unit u such that u*beta is a dth power
-function ispower_mod_units(units::Vector{FacElem{nf_elem, AnticNumberField}},
-                           beta::FacElem{nf_elem, AnticNumberField}, d::Int;
+function ispower_mod_units(units::Vector{FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}},
+                           beta::FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}, d::Int;
                            stable = 10, trager = true,
                            write = false, decom = false, strategy = :classic)
-  @assert Hecke.isprime_power(d)
-  if isprime(d)
+  @assert Hecke.is_prime_power(d)
+  if is_prime(d)
     b, r = _ispower_mod_units_prime(units, beta, Int(d), stable = stable,
                                                          trager = trager,
                                                          decom = decom,
                                                          write = write,
                                                          strategy = strategy)
   else
-    e, p = Hecke.ispower(d)
+    e, p = Hecke.is_power(d)
     if !has_grunwald_wang_obstruction(base_ring(beta), p, d)
       b, r = _ispower_mod_units_generic(units, beta, Int(d), stable = stable,
                                                              trager = trager,
@@ -282,10 +282,10 @@ function ispower_mod_units(units::Vector{FacElem{nf_elem, AnticNumberField}},
 end
 
 function ispower_mod_units(N::NormRelation,
-                           beta::FacElem{nf_elem, AnticNumberField}, d::Int;
+                           beta::FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}, d::Int;
                            stable = 10, redo = false, trager = true,
                            write = false,
-                           additional_units::Vector{nf_elem} = nf_elem[],
+                           additional_units::Vector{AbsSimpleNumFieldElem} = AbsSimpleNumFieldElem[],
                            decom = false,
                            strategy = :classic)
   @vprint :NormRelation 1 "Calling ispower_mod_units with d = $d and field of degree $(degree(base_ring(beta)))\n"
@@ -293,10 +293,10 @@ function ispower_mod_units(N::NormRelation,
   K = base_ring(beta)
   @assert field(N) == K
 
-  #utx = Hecke.UnitGrpCtx{FacElem{nf_elem, AnticNumberField}}(OK)
+  #utx = Hecke.UnitGrpCtx{FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}}(OK)
   #U = compute_unit_group_using_norm_relation(OK, N; saturate = true)
   #units = U.units
-  units = FacElem{nf_elem, AnticNumberField}[]
+  units = FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}[]
   for i in 1:length(N)
     L, mL = subfield(N, i)
     @vprint :NormRelation 1 "Computing unit group classically in subfield\n$(L)\n"
@@ -342,7 +342,7 @@ end
 # mode = 0 => use subfields via norm relations
 # mode = 1 => use units of parent field
 # mode = 2 => use s-units
-function ispower_mod_units(beta::FacElem{nf_elem, AnticNumberField}, d::Int;
+function ispower_mod_units(beta::FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}, d::Int;
                            stable = 10, mode = 0, free = false, redo = false,
                            min_degree::Int = 1, trager = true)
     K = base_ring(beta)
@@ -353,7 +353,7 @@ function ispower_mod_units(beta::FacElem{nf_elem, AnticNumberField}, d::Int;
         return ispower_mod_units(N, beta, d, stable=stable, redo=redo, trager=trager)
     elseif mode == 1
         U, mU = unit_group_fac_elem(maximal_order(K))
-        units = FacElem{nf_elem, AnticNumberField}[mU(U[i]) for i in 1:ngens(U)]
+        units = FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}[mU(U[i]) for i in 1:ngens(U)]
         return ispower_mod_units(units, beta, d, stable=stable, redo=redo, trager=trager)
     else
         # old approach with s-units
@@ -378,7 +378,7 @@ function ispower_mod_units(beta::FacElem{nf_elem, AnticNumberField}, d::Int;
         A, mA = _sunit_group_fac_elem_mod_units_quo_via_brauer(N, S, 0, true)
         exps = mA \ beta
 
-        new_exps = fmpz[]
+        new_exps = ZZRingElem[]
         for i in 1:length(S)
             b, q = divides(Int(exps[i]), d)
             if !b return (b, beta) end

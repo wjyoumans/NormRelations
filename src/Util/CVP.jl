@@ -2,7 +2,7 @@
 # Computes an orthogonal basis of space spanned by the columns of M using 
 # Gram-Schmidt along with a vector encoding the linearly independent columns of 
 # the input matrix.
-function gram_schmidt(M::arb_mat; orthonormal=false)
+function gram_schmidt(M::ArbMatrix; orthonormal=false)
   M2 = deepcopy(M)
   N = zero_matrix(parent(M[1, 1]), nrows(M), 0)
   v = []
@@ -28,7 +28,7 @@ function gram_schmidt(M::arb_mat; orthonormal=false)
 end
 
 # Find approximate solution to CVP using Babai round-off tecnhique.
-function round_off(L::arb_mat, t::arb_mat; use_lll=true)
+function round_off(L::ArbMatrix, t::ArbMatrix; use_lll=true)
   s = solve(L, t)
   return [round(Hecke._arb_get_fmpq(a)) for a in s]
 end
@@ -37,7 +37,7 @@ end
 # form a basis for a lattice and a target (column) vector t, find a 
 # vector v in Z^k and d in the fundamental parallelipiped of B such 
 # that B*v + d = t. Can pass gram-schmidt basis if it's already computed.
-function nearest_plane(B::arb_mat, t::arb_mat, gs=gram_schmidt(B))
+function nearest_plane(B::ArbMatrix, t::ArbMatrix, gs=gram_schmidt(B))
   B_tilde, indep = gs
   A = parent(B[1,1])
 
@@ -59,7 +59,7 @@ end
 # basis for a lattice (not neccesarily linearly independent vectors), 
 # and a target (column) vector t. Output a (v, x) with v = W*x where v is
 # close to t, satisfying ||W*x - t||_inf <= (2log(8n))^(1/2) * max(w).
-function close_vector(W::arb_mat, t::arb_mat)
+function close_vector(W::ArbMatrix, t::ArbMatrix)
   local x, y, v
   A = parent(W[1,1])
   n = nrows(W)

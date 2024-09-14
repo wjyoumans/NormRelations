@@ -6,7 +6,7 @@
 # If the S-unit group of OK^+ has already been computed and cached and S is known
 # to generate Cl(OK)^+ then the cache can be provided.
 function minus_part_prime_ideals_up_to(
-    OK::NfOrd,
+    OK::AbsSimpleNumFieldOrder,
     B::Int;
     cache::NormRelCache=NormRelCache(), # cache of K^+
     stable=STABLE, 
@@ -26,7 +26,7 @@ function minus_part_prime_ideals_up_to(
   end
 
   S = sort!(prime_ideals_up_to(OK, B), by=norm)
-  S0 = NfOrdIdl[]
+  S0 = AbsSimpleNumFieldOrderIdeal[]
   for P in S
     A = norm(emb, P, order=ord)
     if decisional_pip(A, cache=cache, parisizemax=parisizemax, stable=stable, 
@@ -42,7 +42,7 @@ function minus_part_prime_ideals_up_to(
 end
 
 function minus_part_generating_set(
-    K::AnticNumberField,
+    K::AbsSimpleNumField,
     B::Int=10000;
     stable=STABLE, 
     parisizemax=PARISIZEMAX,
@@ -56,7 +56,7 @@ function minus_part_generating_set(
 end
 
 function minus_part_generating_set(
-    OK::NfOrd,
+    OK::AbsSimpleNumFieldOrder,
     B::Int=10000;
     stable=STABLE, 
     parisizemax=PARISIZEMAX,
@@ -76,7 +76,7 @@ function minus_part_generating_set(
   S = sort!(prime_ideals_up_to(OK, B), by=norm)
   mins = Set([minimum(P) for P in S])
 
-  S0 = NfOrdIdl[]
+  S0 = AbsSimpleNumFieldOrderIdeal[]
   SinCK = elem_type(CK)[]
   ord = 0
   d = 0
@@ -124,10 +124,10 @@ end
 
 
 # Random subset of d primes of S0 and their conjugates.
-function rand_subset(S0::Vector{NfOrdIdl}, d::Int)
+function rand_subset(S0::Vector{AbsSimpleNumFieldOrderIdeal}, d::Int)
   K = nf(S0[1])
   temp = copy(S0)
-  S = NfOrdIdl[]
+  S = AbsSimpleNumFieldOrderIdeal[]
   for i = 1:d
     P = Base.rand(temp)
     conj = remove_conjugates!(temp, P)
@@ -137,7 +137,7 @@ function rand_subset(S0::Vector{NfOrdIdl}, d::Int)
 end
 
 function test_minus_part_generating_set(
-    OK::NfOrd,
+    OK::AbsSimpleNumFieldOrder,
     B::Int,
     d::Int,
     iters::Int;

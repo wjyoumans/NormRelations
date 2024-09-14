@@ -12,7 +12,7 @@ using NormRelations
 #
 #####################################################################
 
-K, a = CyclotomicField(56, "a")
+K, a = cyclotomic_field(56, "a")
 OK = lll(maximal_order(K))
 g = 2*a^22 + 2*a^20 + 2*a^18 + a^17 - a^16 + 2*a^15 + a^14 + 2*a^13 + a^11 - 2*a^10 + a^9 - a^8 + 2*a^6 - 2*a^5 + 2*a^4 + 2*a^3 - a - 2
 I = ideal(OK, OK(g))

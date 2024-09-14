@@ -2,32 +2,34 @@ import Hecke: class_group_ctx, unit_group_ctx
 
 ########################################################################
 
-function _howell_form_lower_left(x::nmod_mat)
+function _howell_form_lower_left(x::zzModMatrix)
   h = howell_form(reverse_cols(x))
   reverse_cols!(h)
   reverse_rows!(h)
   return h
 end
 
-function _left_kernel_prime_power(A::nmod_mat, p::Int, l::Int)
+function _left_kernel_prime_power(A::zzModMatrix, p::Int, l::Int)
   R = base_ring(A)
   Alift = lift_nonsymmetric(A)
-  F = GF(p)
-  _, _M = left_kernel(change_base_ring(F, Alift))
+  F = Hecke.Nemo.Native.GF(p)
+  _M = kernel(change_base_ring(F, Alift); side = :left)
+  _M = vcat(_M, zero_matrix(F, nrows(Alift) - nrows(_M), ncols(_M)))
   M = lift_nonsymmetric(_M)
-  Mi = hnf_modular_eldiv(M, fmpz(p))
+  Mi = hnf_modular_eldiv(M, ZZRingElem(p))
   r = nrows(Mi)
-  while r > 0 && iszero_row(Mi, r)
+  while r > 0 && is_zero_row(Mi, r)
     r -= 1
   end
   Mi = sub(Mi, 1:r, 1:ncols(Mi))
   Mfi = Mi * Alift
   local H
   for i in 1:(l - 1)
-    _, K = left_kernel(change_base_ring(F, divexact(Mfi, p^i)))
-    H = hnf_modular_eldiv(lift_nonsymmetric(K), fmpz(p))
+    K = kernel(change_base_ring(F, divexact(Mfi, p^i)); side = :left)
+    K = vcat(K, zero_matrix(F, nrows(Mfi) - nrows(K), ncols(K)))
+    H = hnf_modular_eldiv(lift_nonsymmetric(K), ZZRingElem(p))
     r = nrows(H)
-    while iszero_row(H, r)
+    while is_zero_row(H, r)
       r -= 1
     end
     H = sub(H, 1:r, 1:ncols(H))
@@ -37,20 +39,20 @@ function _left_kernel_prime_power(A::nmod_mat, p::Int, l::Int)
   end
   Khow = howell_form(change_base_ring(R, Mi))
   i = 1
-  while i <= nrows(Khow) && !iszero_row(Khow, i)
+  while i <= nrows(Khow) && !is_zero_row(Khow, i)
     i += 1
   end
   return i - 1, Khow
 end
 
 function has_grunwald_wang_obstruction(K, p, d)
-  @assert Hecke.isprime_power(d)
+  @assert Hecke.is_prime_power(d)
 
   if mod(d, 8) != 0
     return false
   end
 
-  x = PolynomialRing(FlintZZ, cached = false)[2]
+  x = polynomial_ring(ZZ, cached = false)[2]
   r = 1
   f = cos_minpoly(2, x)
   while Hecke.hasroot(f, K)[1]
@@ -65,15 +67,15 @@ function has_grunwald_wang_obstruction(K, p, d)
     return false
   end
 
-  if issquare(K(-1))[1]
+  if is_square(K(-1))[1]
     return false
   end
 
-  if issquare(2 + etas)[1]
+  if is_square(2 + etas)[1]
     return false
   end
 
-  if issquare(-(2 + etas))[1]
+  if is_square(-(2 + etas))[1]
     return false
   end
 
@@ -89,19 +91,19 @@ end
 ################################################################################
 
 
-function lift_nonsymmetric(a::nmod_mat)
-    z = fmpz_mat(nrows(a), ncols(a))
+function lift_nonsymmetric(a::zzModMatrix)
+    z = ZZMatrix(nrows(a), ncols(a))
     #z.base_ring = FlintZZ
     ccall((:fmpz_mat_set_nmod_mat_unsigned, Hecke.libflint), Nothing,
-            (Ref{fmpz_mat}, Ref{nmod_mat}), z, a)
+            (Ref{ZZMatrix}, Ref{zzModMatrix}), z, a)
     return z
 end
 
-function lift_nonsymmetric(a::gfp_mat)
-    z = fmpz_mat(nrows(a), ncols(a))
+function lift_nonsymmetric(a::fpMatrix)
+    z = ZZMatrix(nrows(a), ncols(a))
     #z.base_ring = FlintZZ
     ccall((:fmpz_mat_set_nmod_mat_unsigned, Hecke.libflint), Nothing,
-            (Ref{fmpz_mat}, Ref{gfp_mat}), z, a)
+            (Ref{ZZMatrix}, Ref{fpMatrix}), z, a)
     return z
 end
 
@@ -146,7 +148,7 @@ function dlog(dl::Dict, x, p::Int)
     return dl[x]
   end
 
-function mod_p(R, Q::NfOrdIdl, p::Int, T)
+function mod_p(R, Q::AbsSimpleNumFieldOrderIdeal, p::Int, T)
   @vprint :NormRelation 2 "mod_p: Q=$(Q), p=$(p)\n"
 
   Zk = order(Q)
@@ -180,9 +182,9 @@ function saturate_exp(R, d::Int; stable = 10, strategy = :classic, must_be_uniqu
   K = base_ring(R[1])
   OK = maximal_order(K)
 
-  @assert isprime(d)
+  @assert is_prime(d)
 
-  T = GF(d)
+  T = Hecke.Nemo.Native.GF(d)
   A = identity_matrix(T, length(R))
   n = ncols(A)
   i = 1
@@ -300,14 +302,14 @@ function saturate_exp(R, d::Int; stable = 10, strategy = :classic, must_be_uniqu
   return lift_nonsymmetric(transpose(A))
 end
 
-function saturate_exp_generic(R::Vector{FacElem{nf_elem, AnticNumberField}}, d::Int; stable = 10, early_abort = false, strategy = :classic)
-  @assert Hecke.isprime_power(d)
-  k, p = Hecke.ispower(d)
-  @assert isprime(p)
+function saturate_exp_generic(R::Vector{FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}}, d::Int; stable = 10, early_abort = false, strategy = :classic)
+  @assert Hecke.is_prime_power(d)
+  k, p = Hecke.is_power(d)
+  @assert is_prime(p)
   K = base_ring(R[1])
   OK = maximal_order(K)
 
-  T = ResidueRing(FlintZZ, d)
+  T, = residue_ring(ZZ, d)
   n = length(R)
   i = 1
   A = identity_matrix(T, length(R))
@@ -429,7 +431,7 @@ function saturate_exp_generic(R::Vector{FacElem{nf_elem, AnticNumberField}}, d::
 end
 
 function _simplify(c::Hecke.ClassGrpCtx, U::Hecke.UnitGrpCtx)
-  d = Hecke.class_group_init(c.FB, SMat{fmpz}, add_rels = false)
+  d = Hecke.class_group_init(c.FB, SMat{ZZRingElem}, add_rels = false)
 
   for i=1:length(U.units)  
     Hecke.class_group_add_relation(d, U.units[i], SRow(FlintZZ))
@@ -437,14 +439,14 @@ function _simplify(c::Hecke.ClassGrpCtx, U::Hecke.UnitGrpCtx)
   return d
 end
 
-function saturate(R::Vector{FacElem{nf_elem, AnticNumberField}}, d::Int64; 
+function saturate(R::Vector{FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}}, d::Int64; 
     stable=10, strategy=:classic)
 
-  if isprime(d)
+  if is_prime(d)
     @vtime :NormRelation 2 A = saturate_exp(R, d, stable=stable, 
       strategy=strategy)
   else
-    e, p = Hecke.ispower(d)
+    e, p = Hecke.is_power(d)
     if !has_grunwald_wang_obstruction(base_ring(R[1]), p, d)
       @vtime :NormRelation 2 A = saturate_exp_generic(R, d, stable=stable, 
         strategy=strategy)
@@ -459,13 +461,13 @@ function saturate(R::Vector{FacElem{nf_elem, AnticNumberField}}, d::Int64;
 end
 
 function saturate_with_fixed_element(
-    units::Vector{FacElem{nf_elem, AnticNumberField}}, 
-    beta::FacElem{nf_elem, AnticNumberField}, 
+    units::Vector{FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}}, 
+    beta::FacElem{AbsSimpleNumFieldElem, AbsSimpleNumField}, 
     d::Int; 
     stable = 10, 
     strategy = :classic)
 
-  @assert Hecke.isprime_power(d)
+  @assert Hecke.is_prime_power(d)
   R = copy(units)
   push!(R, beta)
 
