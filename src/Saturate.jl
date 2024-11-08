@@ -154,8 +154,11 @@ function mod_p(R, Q::AbsSimpleNumFieldOrderIdeal, p::Int, T)
   Zk = order(Q)
   F, mF = Hecke.ResidueFieldSmallDegree1(Zk, Q)
   mF1 = Hecke.extend_easy(mF, number_field(Zk))
-  @assert size(F) % p == 1
   pp, e = Hecke.ppio(Int(size(F)-1), p)
+  #@assert size(F) % p == 1
+  # find k with
+  # F*/F*^p = k*Z/p*Z
+  k = div(p, min(p, pp))
   dl = Dict{elem_type(F), Int}()
   dl[F(1)] = 0
   lp = factor(p)
@@ -175,7 +178,7 @@ function mod_p(R, Q::AbsSimpleNumFieldOrderIdeal, p::Int, T)
   end
   #TODO: in the image of mF1, if the input is a FacElem, the exponents should be reduced by pp.
   #This avoids some inverses.
-  return matrix(T, 1, length(R), Int[dlog(dl, image(mF1, x, pp)^e, pp) % p for x in R])
+  return matrix(T, 1, length(R), Int[k * (dlog(dl, image(mF1, x, pp)^e, pp) % p) for x in R])
 end
 
 function saturate_exp(R, d::Int; stable = 10, strategy = :classic, must_be_unique::Bool = false)
@@ -244,7 +247,7 @@ function saturate_exp(R, d::Int; stable = 10, strategy = :classic, must_be_uniqu
     end
   else
     @assert strategy == :aurel
-    stable = Hecke.unit_group_rank(K) + 40
+    stable = Hecke.unit_group_rank(K) + 4 * stable
 
     for q in S
 
@@ -316,7 +319,7 @@ function saturate_exp_generic(R::Vector{FacElem{AbsSimpleNumFieldElem, AbsSimple
 
   num = 0
 
-  S = Hecke.PrimesSet(Hecke.p_start, -1, d, 1)
+  S = Hecke.PrimesSet(2, -1, p, 1)
 
   if strategy == :classic
     for q in S
@@ -338,7 +341,6 @@ function saturate_exp_generic(R::Vector{FacElem{AbsSimpleNumFieldElem, AbsSimple
       if length(lq) == 0
         continue
       end
-
 
       for Q in lq
         try
@@ -373,7 +375,7 @@ function saturate_exp_generic(R::Vector{FacElem{AbsSimpleNumFieldElem, AbsSimple
 
     end
   elseif strategy == :aurel
-    stable = Hecke.unit_group_rank(K) + 40
+    stable = Hecke.unit_group_rank(K) + 4 * stable
 
     for q in S
       if isdefining_polynomial_nice(K) && isindex_divisor(OK, q)
